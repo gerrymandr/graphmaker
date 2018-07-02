@@ -1,4 +1,4 @@
-FROM maxhully/vrdi:latest
+FROM contiuumio/miniconda3:latest
 
 WORKDIR /usr/src
 
