@@ -17,16 +17,16 @@ fips_codes = ['01', '02'] + list(map(zfill2, range(4, 57)))
 
 
 def state_zip_url(fips, year='2012'):
-    return f"https://www2.census.gov/geo/tiger/TIGER{year}/VTD/" \
-           f"tl_{year}_{fips}_vtd10.zip"
+    base = "https://www2.census.gov/geo/tiger/TIGER"
+    return base + year + "/VTD/tl_" + year + "_" + fips + "_vtd10.zip"
 
 
 def target_folder(fips):
-    return f"./tiger_data/{fips}"
+    return "./tiger_data/" + fips
 
 
 def shp_location(fips, year='2012'):
-    return os.path.join(target_folder(fips), f"tl_{year}_{fips}_vtd10.shp")
+    return os.path.join(target_folder(fips), "tl_" + year + "_" + fips + "_vtd10.shp")
 
 
 def download_state_vtds(fips):
@@ -36,7 +36,7 @@ def download_state_vtds(fips):
 
 
 def output_location(fips):
-    return f"./graphs/{fips}.json"
+    return "./graphs/" + fips + ".json"
 
 
 def main():
@@ -48,7 +48,7 @@ def main():
             with open(output_location(fips), "w+") as f:
                 json.dump(networkx.json_graph.adjacency_data(graph), f)
         except Exception:
-            print(f"An error occurred for FIPS code {fips}")
+            print("An error occurred for FIPS code " + fips)
 
 
 if __name__ == '__main__':
