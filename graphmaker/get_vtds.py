@@ -6,7 +6,7 @@ import zipfile
 import networkx
 import requests
 
-from rundmcmc.make_graph import construct_graph_from_file
+from make_graph import construct_graph_from_file
 
 
 def zfill2(x):
