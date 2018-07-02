@@ -1,0 +1,7 @@
+version: '3.4'
+services:
+    vtds:
+        build: .
+        volumes:
+        - /data/tiger_data:/code/tiger_data
+        - /data/graphs:/code/graphs
