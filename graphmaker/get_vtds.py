@@ -16,17 +16,17 @@ def zfill2(x):
 fips_codes = ['01', '02'] + list(map(zfill2, range(4, 57)))
 
 
-def state_zip_url(fips):
-    return f"https://www2.census.gov/geo/tiger/TIGER2012/VTD/" \
-           f"tl_2012_{fips}_vtd10.zip"
+def state_zip_url(fips, year='2012'):
+    return f"https://www2.census.gov/geo/tiger/TIGER{year}/VTD/" \
+           f"tl_{year}_{fips}_vtd10.zip"
 
 
 def target_folder(fips):
     return f"./tiger_data/{fips}"
 
 
-def shp_location(fips):
-    return os.path.join(target_folder(fips), f"tl_2012_{fips}_vtd10.shp")
+def shp_location(fips, year='2012'):
+    return os.path.join(target_folder(fips), f"tl_{year}_{fips}_vtd10.shp")
 
 
 def download_state_vtds(fips):
