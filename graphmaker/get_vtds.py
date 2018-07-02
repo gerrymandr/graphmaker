@@ -40,12 +40,15 @@ def output_location(fips):
 
 
 def main():
-    for fips in fips_codes[4:]:
-        download_state_vtds(fips)
-        graph = construct_graph_from_file(shp_location(
-            fips), 'GEOID10', ['ALAND10', 'COUNTYFP10'])
-        with open(output_location(fips), "w+") as f:
-            json.dump(networkx.json_graph.adjacency_data(graph), f)
+    for fips in fips_codes[5:]:
+        try:
+            download_state_vtds(fips)
+            graph = construct_graph_from_file(shp_location(
+                fips), 'GEOID10', ['ALAND10', 'COUNTYFP10'])
+            with open(output_location(fips), "w+") as f:
+                json.dump(networkx.json_graph.adjacency_data(graph), f)
+        except Exception:
+            print(f"An error occurred for FIPS code {fips}")
 
 
 if __name__ == '__main__':
