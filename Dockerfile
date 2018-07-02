@@ -1,4 +1,4 @@
-FROM contiuumio/miniconda3:latest
+FROM continuumio/miniconda3:latest
 
 WORKDIR /usr/src
 
