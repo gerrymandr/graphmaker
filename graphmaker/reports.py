@@ -16,7 +16,7 @@ def graph_statistics(graph):
     degree_counts = Counter(degrees)
     min_degree = min(degree_counts.keys())
     max_degree = max(degree_counts.keys())
-    mean_degree = round(statistics.mean(degrees), 3)
+    mean_degree = round(statistics.mean(degrees), 6)
     median_degree = statistics.median(degrees)
     return {"number_of_nodes": graph.number_of_nodes(),
             "number_of_edges": graph.number_of_edges(),
