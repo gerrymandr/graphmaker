@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import pathlib
 import sys
 
 import networkx
@@ -29,10 +30,15 @@ def build_reports(rook_graph, queen_graph):
 
 def save_graphs(rook_graph, queen_graph):
     logging.info('Saving graphs.')
-    save(rook_graph,
-         filepath=f"./graphs/rook/{rook_graph.graph['state']}.json")
-    save(queen_graph,
-         filepath=f"./graphs/queen/{queen_graph.graph['state']}.json")
+
+    # Ensure that the paths exist:
+    state = rook_graph.graph['state']
+    path = f"./graphs/{state}/"
+    pathlib.Path(f"./graphs/{state}/").mkdir(parents=True, exist_ok=True)
+
+    # Save the graphs in their respective homes:
+    save(rook_graph, filepath=os.path.join(path, 'rook.json'))
+    save(queen_graph, filepath=os.path.join(path, 'queen.json'))
 
 
 def save(graph, location='./graphs/', filepath=None):
