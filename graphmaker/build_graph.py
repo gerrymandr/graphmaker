@@ -34,12 +34,16 @@ def infer_id_column(dataframe, id_column=None):
                          'a plausible id_column in the dataframe.')
 
 
-def add_metadata(graph, df):
+def add_metadata(graph, df, **kwargs):
     state_col = find_column_with(df.columns, 'state')
     if state_col:
         graph.graph['state'] = df[state_col][0]
     graph.graph['id'] = uuid.uuid4()
     graph.graph['created'] = datetime.datetime.utcnow()
+
+    # add whatever other metadata the user wants to add
+    for key, value in kwargs:
+        graph.graph[key] = value
 
 
 def construct_rook_and_queen_graphs(shapefile, id_column=None, data_columns=None):
@@ -56,7 +60,7 @@ def construct_rook_and_queen_graphs(shapefile, id_column=None, data_columns=None
     queen_graph = construct_graph_from_df(
         df, geoid_col=id_column, cols_to_add=data_columns, queen=True)
 
-    add_metadata(rook_graph, df)
-    add_metadata(queen_graph, df)
+    add_metadata(rook_graph, df, type='rook')
+    add_metadata(queen_graph, df, type='queen')
 
     return rook_graph, queen_graph
