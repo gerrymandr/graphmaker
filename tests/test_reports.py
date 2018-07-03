@@ -1,4 +1,3 @@
-from collections import Counter
 from unittest.mock import Mock
 
 import networkx
@@ -74,7 +73,8 @@ def test_rook_vs_queen_works_on_a_small_example():
     result = rook_vs_queen(rook, queen)
     assert result['number_of_rook_edges'] == 4
     assert result['number_of_queen_edges'] == 6
-    assert result['size_of_intersection'] == 4
+    assert result['common_edges'] == 4
+    assert result['symmetric_difference'] == 2
 
 
 def test_report_calls_every_function():

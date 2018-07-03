@@ -18,40 +18,47 @@ def graph_statistics(graph):
     max_degree = max(degree_counts.keys())
     mean_degree = round(statistics.mean(degrees), 6)
     median_degree = statistics.median(degrees)
-    return {"number_of_nodes": graph.number_of_nodes(),
-            "number_of_edges": graph.number_of_edges(),
-            "degree_statistics": {
-                "counts": dict(degree_counts),
-                "min": min_degree,
-                "max": max_degree,
-                "mean": mean_degree,
-                "median": median_degree
+    return {'number_of_nodes': graph.number_of_nodes(),
+            'number_of_edges': graph.number_of_edges(),
+            'degree_statistics': {
+                'counts': dict(degree_counts),
+                'min': min_degree,
+                'max': max_degree,
+                'mean': mean_degree,
+                'median': median_degree
     }}
 
 
 def number_connected_components(graph):
     number = networkx.number_connected_components(graph)
-    return {"connected_components": number}
+    return {'connected_components': number}
 
+
+def sizes_of_connected_components(graph):
+    sizes = [len(c) for c in networkx.connected_components(graph)]
+    return {'sizes_of_connected_components': sizes}
 
 # def planar(graph):
 #    is_planar = planarity.is_planar(graph)
-#    return {"is_planar": is_planar}
+#    return {'is_planar': is_planar}
 
 
 def unit_contained_in_another(graph):
     trapped_nodes = [node for node in graph.nodes
                      if len(list(graph.neighbors(node))) == 1]
-    return {"units_entirely_contained_in_another": trapped_nodes,
-            "number_of_units_entirely_contained_in_another": len(trapped_nodes)}
+    return {'units_entirely_contained_in_another': trapped_nodes,
+            'number_of_units_entirely_contained_in_another': len(trapped_nodes)}
 
 
 def rook_vs_queen(rook_graph, queen_graph):
     rook_edges = edge_set(rook_graph.edges)
     queen_edges = edge_set(queen_graph.edges)
-    return {"number_of_rook_edges": len(rook_edges),
-            "number_of_queen_edges": len(queen_edges),
-            "size_of_intersection": len(rook_edges & queen_edges)}
+    intersection = len(rook_edges & queen_edges)
+    difference = len(rook_edges | queen_edges) - intersection
+    return {'number_of_rook_edges': len(rook_edges),
+            'number_of_queen_edges': len(queen_edges),
+            'common_edges': intersection,
+            'symmetric_difference': difference}
 
 
 def report(graph, reports=[graph_statistics, number_connected_components,
