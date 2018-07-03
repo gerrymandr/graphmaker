@@ -55,9 +55,12 @@ def main():
         "C:\\Users\\maxhu\\Downloads\\tl_2012_26_vtd10\\tl_2012_26_vtd10.shp", "GEOID10", None)
 
     for graph in (rook, queen):
-        result = add_columns_from_csv_to_graph(
-            graph, './26_data.csv', 'GEOID10')
-        print(result)
+        try:
+            result = add_columns_from_csv_to_graph(
+                graph, './26_data.csv', 'GEOID10')
+            print(result)
+        except Exception:
+            logging.error("Could not add data columns to the graph.")
 
     save_graphs(rook, queen)
 
@@ -65,4 +68,5 @@ def main():
 
 
 if __name__ == '__main__':
-    print(main())
+    result = main()
+    print(json.dumps(result, indent=2))

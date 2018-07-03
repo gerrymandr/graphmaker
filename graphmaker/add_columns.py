@@ -4,17 +4,11 @@ import statistics
 import networkx
 import numpy
 
+from data_utils import serialize_histogram
+
 
 def add_column_to_graph(graph, column):
     networkx.set_node_attributes(graph, column)
-
-
-def serialize_histogram(hist):
-    counts, bin_endpoints = hist
-    bins = list()
-    for left, right in zip(bin_endpoints[:-1], bin_endpoints[1:]):
-        bins.append([round(left, 6), round(right, 6)])
-    return {'bins': bins, 'counts': list(counts)}
 
 
 def summary(data):
@@ -23,6 +17,7 @@ def summary(data):
             'median': round(statistics.mean(data), 6),
             'max': max(data),
             'min': min(data),
+            'variance': round(statistics.variance(data), 6),
             'histogram': hist}
 
 
