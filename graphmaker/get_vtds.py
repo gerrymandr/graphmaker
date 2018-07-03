@@ -40,7 +40,9 @@ def output_location(fips):
 
 
 def main():
-    for fips in fips_codes[5:]:
+    for fips in fips_codes:
+        if fips + ".json" in os.listdir("./graphs"):
+            continue
         try:
             download_state_vtds(fips)
             graph = construct_graph_from_file(shp_location(

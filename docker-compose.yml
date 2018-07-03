@@ -1,0 +1,7 @@
+version: '3.4'
+services:
+    graphmaker:
+        build: .
+        volumes:
+        - /usr/src/graphmaker/graphmaker/graphs:/code/graphs
+        - /usr/src/graphmaker/graphmaker/tiger_data:/code/tiger_data
