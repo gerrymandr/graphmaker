@@ -1,9 +1,12 @@
+import json
 from unittest.mock import Mock
 
 import networkx
+import numpy
 from graphmaker.reports import (edge_set, eigenvalues_hist, graph_statistics,
                                 number_connected_components, report,
-                                rook_vs_queen, unit_contained_in_another)
+                                rook_vs_queen, serializable_histogram,
+                                unit_contained_in_another)
 
 
 def test_edge_set_is_insensitive_to_order_of_nodes():
@@ -104,3 +107,9 @@ def test_eigenvalues_hist_returns_floats_and_ints():
         assert isinstance(right, float)
     for count in hist['counts']:
         assert isinstance(count, int)
+
+
+def test_serializable_histogram_returns_serializable():
+    data = numpy.random.normal(size=100)
+    serialized = json.dumps(serializable_histogram(data))
+    assert serialized

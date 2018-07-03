@@ -3,7 +3,7 @@ import statistics
 
 import networkx
 
-from data_utils import serializable_histogram
+from reports import serializable_histogram
 
 
 def add_column_to_graph(graph, column):
