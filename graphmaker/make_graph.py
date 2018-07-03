@@ -7,6 +7,8 @@ import pysal as ps
 from networkx.readwrite import json_graph
 from shapely.ops import cascaded_union
 
+from geospatial import reprojected
+
 
 def get_list_of_data(filepath, col_name, geoid=None):
     """Pull a column data from a shape or CSV file.
@@ -66,6 +68,9 @@ def construct_graph_from_df(df, geoid_col=None, cols_to_add=None, queen=False):
     :returns: NetworkX Graph.
 
     """
+    # reproject to a UTM projection for accurate areas and perimeters in meters
+    df = reprojected(df)
+
     if geoid_col is not None:
         df = df.set_index(geoid_col)
 
