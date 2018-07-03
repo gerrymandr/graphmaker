@@ -5,8 +5,7 @@ from collections import Counter
 import networkx
 import numpy
 import scipy
-
-from .data_utils import serialize_histogram
+from graphmaker.data_utils import serialize_histogram
 
 # import planarity
 
