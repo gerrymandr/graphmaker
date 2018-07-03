@@ -1,12 +1,8 @@
 import io
-import json
 import os
 import zipfile
 
-import networkx
 import requests
-
-from make_graph import construct_graph_from_file
 
 
 def zfill2(x):
@@ -45,10 +41,6 @@ def main():
             continue
         try:
             download_state_vtds(fips)
-            graph = construct_graph_from_file(shp_location(
-                fips), 'GEOID10', ['ALAND10', 'COUNTYFP10'])
-            with open(output_location(fips), "w+") as f:
-                json.dump(networkx.json_graph.adjacency_data(graph), f)
         except Exception:
             print("An error occurred for FIPS code " + fips)
 
