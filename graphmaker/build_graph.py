@@ -37,9 +37,9 @@ def infer_id_column(dataframe, id_column=None):
 def add_metadata(graph, df):
     state_col = find_column_with(df.columns, 'state')
     if state_col:
-        graph['state'] = df[state_col][0]
-    graph['id'] = uuid.uuid4()
-    graph['created'] = datetime.datetime.isoformat()
+        graph.graph['state'] = df[state_col][0]
+    graph.graph['id'] = uuid.uuid4()
+    graph.graph['created'] = datetime.datetime.utcnow()
 
 
 def construct_rook_and_queen_graphs(shapefile, id_column=None, data_columns=None):

@@ -38,9 +38,8 @@ def column_statistics(column):
 
 def column_report(table, column_name, graph):
     return {'column_name': column_name,
-            'created': datetime.datetime.isoformat(),
-            'graph': graph['id'],
-            'state': graph['state'],
+            'created': datetime.datetime.utcnow(),
+            'graph': graph.graph.get('id'),
             'report': column_statistics(table[column_name])}
 
 

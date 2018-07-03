@@ -13,8 +13,8 @@ logging.basicConfig(level=logging.DEBUG)
 
 def save_graphs(rook_graph, queen_graph):
     logging.info('Saving graphs.')
-    save(rook_graph, './graphs/out_rook.json')
-    save(queen_graph, './graphs/out_queen.json')
+    save(rook_graph)
+    save(queen_graph)
 
 
 def build_reports(rook_graph, queen_graph):
@@ -31,9 +31,9 @@ def build_reports(rook_graph, queen_graph):
             "comparison": comparison}
 
 
-def save(graph, location):
+def save(graph, location='./graphs/'):
     try:
-        with open(location, "w+") as f:
+        with open(location + graph.graph['id'], "w+") as f:
             json.dump(f, networkx.json_graph(graph))
     except Exception:
         logging.error('Unable to write the graphs to file.')
