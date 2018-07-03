@@ -73,7 +73,7 @@ def main(args):
     result = build_reports(rook, queen)
 
     state = rook.graph['state']
-    with open(f"./graphs/{state}/report.json") as f:
+    with open(f"./graphs/{state}/report.json", 'w') as f:
         json.dump(result, f)
     return result
 
