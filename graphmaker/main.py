@@ -74,7 +74,7 @@ def main(args):
 
     state = rook.graph['state']
     with open(f"./graphs/{state}/report.json", 'w') as f:
-        json.dump(result, f)
+        f.write(json.dumps(result, indent=2))
     return result
 
 
