@@ -6,6 +6,8 @@ import networkx
 import numpy
 import scipy
 
+from constants import round_to
+
 # import planarity
 
 
@@ -14,7 +16,8 @@ def serializable_histogram(data):
     counts = list(map(int, counts))
     bins = list()
     for left, right in zip(bin_endpoints[:-1], bin_endpoints[1:]):
-        bins.append([round(float(left), 6), round(float(right), 6)])
+        bins.append([round(float(left), round_to),
+                     round(float(right), round_to)])
     return {'bins': bins, 'counts': counts}
 
 
@@ -31,9 +34,9 @@ def graph_statistics(graph):
     degree_counts = Counter(degrees)
     min_degree = min(degree_counts.keys())
     max_degree = max(degree_counts.keys())
-    mean_degree = round(statistics.mean(degrees), 6)
+    mean_degree = round(statistics.mean(degrees), round_to)
     median_degree = statistics.median(degrees)
-    variance = round(statistics.variance(degrees), 6)
+    variance = round(statistics.variance(degrees), round_to)
     return {'number_of_nodes': graph.number_of_nodes(),
             'number_of_edges': graph.number_of_edges(),
             'degree_statistics': {
@@ -90,7 +93,7 @@ def rook_vs_queen(rook_graph, queen_graph):
             'number_of_queen_edges': len(queen_edges),
             'common_edges': intersection,
             'symmetric_difference': difference,
-            'percent_common': intersection / (intersection + difference)}
+            'percent_common': round(intersection / (intersection + difference), round_to)}
 
 
 def report(graph, reports=[graph_statistics, number_connected_components,

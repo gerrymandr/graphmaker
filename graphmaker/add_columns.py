@@ -3,6 +3,7 @@ import statistics
 
 import networkx
 
+from constants import round_to
 from reports import serializable_histogram
 
 
@@ -12,11 +13,11 @@ def add_column_to_graph(graph, column):
 
 def summary(data):
     hist = serializable_histogram(data)
-    return {'mean': round(statistics.mean(data), 6),
-            'median': round(statistics.mean(data), 6),
+    return {'mean': round(statistics.mean(data), round_to),
+            'median': round(statistics.mean(data), round_to),
             'max': max(data),
             'min': min(data),
-            'variance': round(statistics.variance(data), 6),
+            'variance': round(statistics.variance(data), round_to),
             'histogram': hist}
 
 

@@ -1,5 +1,8 @@
 import json
 import logging
+import os
+import pathlib
+import sys
 
 import networkx
 import pandas
@@ -11,30 +14,40 @@ from reports import report, rook_vs_queen
 logging.basicConfig(level=logging.DEBUG)
 
 
-def save_graphs(rook_graph, queen_graph):
-    logging.info('Saving graphs.')
-    save(rook_graph)
-    save(queen_graph)
-
-
 def build_reports(rook_graph, queen_graph):
     logging.info('Building reports for rook- and queen-adjacency graphs.')
     rook_synopsis = report(rook_graph)
     queen_synopsis = report(queen_graph)
 
     logging.info('Comparing rook- and queen-adjacency graphs.')
-    comparison = {"rook_vs_queen_comparison": rook_vs_queen(
+    comparison = {'rook_vs_queen_comparison': rook_vs_queen(
         rook_graph, queen_graph)}
 
-    return {"rook_graph_report": rook_synopsis,
-            "queen_graph_report": queen_synopsis,
-            "comparison": comparison}
+    return {'rook_graph_report': rook_synopsis,
+            'queen_graph_report': queen_synopsis,
+            'comparison': comparison}
 
 
-def save(graph, location='./graphs/'):
+def save_graphs(rook_graph, queen_graph):
+    logging.info('Saving graphs.')
+
+    # Ensure that the paths exist:
+    state = rook_graph.graph['state']
+    path = f"./graphs/{state}/"
+    pathlib.Path(f"./graphs/{state}/").mkdir(parents=True, exist_ok=True)
+
+    # Save the graphs in their respective homes:
+    save(rook_graph, filepath=os.path.join(path, 'rook.json'))
+    save(queen_graph, filepath=os.path.join(path, 'queen.json'))
+
+
+def save(graph, location='./graphs/', filepath=None):
+    if not filepath:
+        filepath = os.path.join(location, graph.graph['id'] + ".json")
     try:
-        with open(location + graph.graph['id'], "w+") as f:
+        with open(filepath, 'w') as f:
             json.dump(f, networkx.json_graph(graph))
+        print(f"Saved the graph to {filepath}")
     except Exception:
         logging.error('Unable to write the graphs to file.')
 
@@ -50,30 +63,25 @@ def add_columns_from_df_to_graph(graph, table, id_column, columns=None):
     return add_columns_and_report(graph, table, columns, id_column)
 
 
-def main():
-    rook, queen = construct_rook_and_queen_graphs(
-        "C:\\Users\\maxhu\\Downloads\\tl_2012_26_vtd10\\tl_2012_26_vtd10.shp", "GEOID10", None)
+def main(args):
+    path = args[0]
 
-    for graph in (rook, queen):
-        try:
-            result = add_columns_from_csv_to_graph(
-                graph, './26_data.csv', 'GEOID10')
-            print(result)
-        except Exception:
-            logging.error("Could not add data columns to the graph.")
+    if not path:
+        raise ValueError('Please specify a shapefile to turn into a graph.')
 
+    rook, queen = construct_rook_and_queen_graphs(path)
     save_graphs(rook, queen)
 
     return build_reports(rook, queen)
 
 
-def just_reports():
-    with open('./graphs/01.json', 'r') as document:
+def load_graph(path):
+    with open(path, 'r') as document:
         data = json.load(document)
     graph = networkx.readwrite.json_graph.adjacency_graph(data)
-    return report(graph)
+    return graph
 
 
 if __name__ == '__main__':
-    result = just_reports()
+    result = main(sys.argv[1:])
     print(json.dumps(result, indent=2))
