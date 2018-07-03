@@ -27,7 +27,7 @@ def test_graph_statistics_works_on_small_example():
     expected = {'number_of_nodes': 5,
                 'number_of_edges': 6,
                 'degree_statistics':
-                    {'counts': {3: 3, 2: 1, 1: 1},
+                    {'counts': {'3': 3, '2': 1, '1': 1},
                      'min': 1,
                      'max': 3,
                      'mean': 2.4,

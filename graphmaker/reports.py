@@ -11,6 +11,10 @@ def edge_set(edges):
     return set(tuple(sorted(edge)) for edge in edges)
 
 
+def dict_with_str_keys(d):
+    return {str(key): value for key, value in dict(d).items()}
+
+
 def graph_statistics(graph):
     degrees = [degree for node, degree in graph.degree]
     degree_counts = Counter(degrees)
@@ -21,7 +25,7 @@ def graph_statistics(graph):
     return {'number_of_nodes': graph.number_of_nodes(),
             'number_of_edges': graph.number_of_edges(),
             'degree_statistics': {
-                'counts': dict(degree_counts),
+                'counts': dict_with_str_keys(degree_counts),
                 'min': min_degree,
                 'max': max_degree,
                 'mean': mean_degree,
