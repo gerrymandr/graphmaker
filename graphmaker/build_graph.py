@@ -34,11 +34,15 @@ def infer_id_column(dataframe, id_column=None):
                          'a plausible id_column in the dataframe.')
 
 
+def generate_id():
+    return str(uuid.uuid4())[:8]
+
+
 def add_metadata(graph, df, **other_fields):
     state_col = find_column_with(df.columns, 'state')
     if state_col:
         graph.graph['state'] = df[state_col][0]
-    graph.graph['id'] = uuid.uuid4()
+    graph.graph['id'] = generate_id()
     graph.graph['created'] = datetime.datetime.utcnow()
 
     # add whatever other metadata the user wants to add

@@ -44,12 +44,10 @@ def save_graphs(rook_graph, queen_graph):
 def save(graph, location='./graphs/', filepath=None):
     if not filepath:
         filepath = os.path.join(location, graph.graph['id'] + ".json")
-    try:
-        with open(filepath, 'w') as f:
-            json.dump(f, networkx.json_graph(graph))
-        print(f"Saved the graph to {filepath}")
-    except Exception:
-        logging.error('Unable to write the graphs to file.')
+    data = networkx.readwrite.json_graph.adjacency_data(graph)
+    with open(filepath, 'w') as f:
+        json.dump(data, f)
+    print(f"Saved the graph to {filepath}")
 
 
 def add_columns_from_csv_to_graph(graph, csv_path, id_column, columns=None):
