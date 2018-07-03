@@ -1,4 +1,6 @@
+import datetime
 import logging
+import uuid
 
 import geopandas
 
@@ -32,6 +34,14 @@ def infer_id_column(dataframe, id_column=None):
                          'a plausible id_column in the dataframe.')
 
 
+def add_metadata(graph, df):
+    state_col = find_column_with(df.columns, 'state')
+    if state_col:
+        graph['state'] = df[state_col][0]
+    graph['id'] = uuid.uuid4()
+    graph['created'] = datetime.datetime.isoformat()
+
+
 def construct_rook_and_queen_graphs(shapefile, id_column=None, data_columns=None):
     df = geopandas.read_file(shapefile)
 
@@ -45,5 +55,8 @@ def construct_rook_and_queen_graphs(shapefile, id_column=None, data_columns=None
     logging.info('Constructing queen graph.')
     queen_graph = construct_graph_from_df(
         df, geoid_col=id_column, cols_to_add=data_columns, queen=True)
+
+    add_metadata(rook_graph, df)
+    add_metadata(queen_graph, df)
 
     return rook_graph, queen_graph

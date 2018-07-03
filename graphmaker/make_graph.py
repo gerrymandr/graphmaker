@@ -69,7 +69,7 @@ def construct_graph_from_df(df, geoid_col=None, cols_to_add=None, queen=False):
     if geoid_col is not None:
         df = df.set_index(geoid_col)
 
-    # Generate rook neighbor lists from dataframe.
+    # Generate rook or queen neighbor lists from dataframe.
     if queen:
         neighbors = ps.weights.Queen.from_dataframe(
             df, geom_col="geometry").neighbors
