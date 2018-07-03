@@ -6,7 +6,7 @@ import networkx
 import numpy
 import scipy
 
-from graphmaker.data_utils import serialize_histogram
+from .data_utils import serialize_histogram
 
 # import planarity
 
