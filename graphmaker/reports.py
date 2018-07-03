@@ -41,7 +41,8 @@ def graph_statistics(graph):
 
 def eigenvalues_hist(graph):
     laplacian = networkx.laplacian_matrix(graph).todense()
-    eigenvalues = numpy.real(scipy.linalg.eigvals(laplacian).tolist())
+    eigenvalues = numpy.real(scipy.linalg.eigvals(
+        laplacian).tolist())
     hist = numpy.histogram(eigenvalues)
     return {'eigenvalues_histogram': serialize_histogram(hist)}
 

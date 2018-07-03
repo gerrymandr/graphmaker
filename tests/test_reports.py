@@ -1,8 +1,7 @@
 from unittest.mock import Mock
 
 import networkx
-
-from graphmaker.reports import (edge_set, graph_statistics,
+from graphmaker.reports import (edge_set, eigenvalues_hist, graph_statistics,
                                 number_connected_components, report,
                                 rook_vs_queen, unit_contained_in_another)
 
@@ -95,3 +94,13 @@ def test_report_calls_every_function():
 
     report(mock_graph, mock_reports)
     assert all(mock.call_count == 1 for mock in mock_reports)
+
+
+def test_eigenvalues_hist_returns_floats_and_ints():
+    graph = networkx.Graph([(0, 1), (1, 2), (2, 3), (3, 0)])
+    hist = eigenvalues_hist(graph)['eigenvalues_histogram']
+    for left, right in hist['bins']:
+        assert isinstance(left, float)
+        assert isinstance(right, float)
+    for count in hist['counts']:
+        assert isinstance(count, int)
