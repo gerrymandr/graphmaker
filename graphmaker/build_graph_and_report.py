@@ -1,4 +1,3 @@
-import cProfile
 import json
 import logging
 import sys
@@ -8,8 +7,6 @@ import networkx
 
 from make_graph import construct_graph_from_df
 from reports import report, rook_vs_queen
-
-logging.basicConfig(level=logging.DEBUG)
 
 
 def find_column_with(columns, pattern):
@@ -94,6 +91,5 @@ def main(shapefile, id_column='GEOID10', *data_columns):
 
 if __name__ == '__main__':
     args = sys.argv[1:]
-    cProfile.run('main(*args)')
-    # result = main(*args)
-    # print(result)
+    result = main(*args)
+    print(result)
