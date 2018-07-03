@@ -49,18 +49,25 @@ def test_unit_contained_in_another_works_on_small_example():
     # If a unit is contained in another, that container will be its only neighbor.
     # The converse is true as long as the graph has more than 2 nodes.
     # 1 - 4 - 5
-    # |   |
+    # |   |   |
+    # 7   8\  9
+    # |   |10 |
     # 2 - 3 - 6
-    graph = networkx.Graph([(1, 2), (2, 3), (3, 4), (4, 1), (4, 5), (3, 6)])
+    graph = networkx.Graph([(1, 7), (2, 7), (2, 3), (3, 8),
+                            (4, 1), (4, 5), (3, 6), (5, 9), (9, 6), (4, 8), (8, 10)])
+    for n in [1, 4, 5, 7, 9, 2, 3, 6]:
+        graph.nodes[n]['boundary_node'] = True
+    for n in [8, 10]:
+        graph.nodes[n]['boundary_node'] = False
 
     result = unit_contained_in_another(graph)
     result_nodes = result['units_entirely_contained_in_another']
 
-    assert len(result_nodes) == 2
-    assert 5 in result_nodes and 6 in result_nodes
+    assert len(result_nodes) == 1
+    assert 10 in result_nodes
 
     result_count = result['number_of_units_entirely_contained_in_another']
-    assert result_count == 2
+    assert result_count == 1
 
 
 def test_rook_vs_queen_works_on_a_small_example():

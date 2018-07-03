@@ -43,9 +43,15 @@ def sizes_of_connected_components(graph):
 #    return {'is_planar': is_planar}
 
 
+def contained_in_its_neighbor(node, graph):
+    return not graph.nodes[node]['boundary_node']
+
+
 def unit_contained_in_another(graph):
-    trapped_nodes = [node for node in graph.nodes
-                     if len(list(graph.neighbors(node))) == 1]
+    degree_one_nodes = [node for node in graph.nodes
+                        if len(list(graph.neighbors(node))) == 1]
+    trapped_nodes = [
+        node for node in degree_one_nodes if contained_in_its_neighbor(node, graph)]
     return {'units_entirely_contained_in_another': trapped_nodes,
             'number_of_units_entirely_contained_in_another': len(trapped_nodes)}
 

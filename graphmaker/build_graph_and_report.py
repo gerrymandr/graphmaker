@@ -40,6 +40,7 @@ def construct_rook_and_queen_graphs(shapefile, id_column=None, data_columns=None
     df = geopandas.read_file(shapefile)
 
     id_column = infer_id_column(df, id_column)
+    df.index = df[id_column]
 
     logging.info('Constructing rook graph.')
     rook_graph = construct_graph_from_df(
@@ -58,10 +59,10 @@ def save_graphs(rook_graph, queen_graph):
     save(queen_graph, './graphs/out_queen.json')
 
 
-def build_reports(rook_graph, queen_graph):
+def build_reports(rook_graph, queen_graph, df):
     logging.info('Building reports for rook- and queen-adjacency graphs.')
-    rook_synopsis = report(rook_graph)
-    queen_synopsis = report(queen_graph)
+    rook_synopsis = report(rook_graph, df)
+    queen_synopsis = report(queen_graph, df)
 
     logging.info('Comparing rook- and queen-adjacency graphs.')
     comparison = {"rook_vs_queen_comparison": rook_vs_queen(
@@ -81,12 +82,12 @@ def save(graph, location):
 
 
 def main(shapefile, id_column='GEOID10', *data_columns):
-    rook, queen = construct_rook_and_queen_graphs(
+    rook, queen, df = construct_rook_and_queen_graphs(
         shapefile, id_column, data_columns)
 
     save_graphs(rook, queen)
 
-    return build_reports(rook, queen)
+    return build_reports(rook, queen, df)
 
 
 if __name__ == '__main__':
