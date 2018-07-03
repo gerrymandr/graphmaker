@@ -70,7 +70,12 @@ def main(args):
     rook, queen = construct_rook_and_queen_graphs(path)
     save_graphs(rook, queen)
 
-    return build_reports(rook, queen)
+    result = build_reports(rook, queen)
+
+    state = rook.graph['state']
+    with open(f"./graphs/{state}/report.json", 'w') as f:
+        f.write(json.dumps(result, indent=2))
+    return result
 
 
 def load_graph(path):

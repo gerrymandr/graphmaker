@@ -43,7 +43,7 @@ def add_metadata(graph, df, **other_fields):
     if state_col:
         graph.graph['state'] = df[state_col][0]
     graph.graph['id'] = generate_id()
-    graph.graph['created'] = datetime.datetime.utcnow()
+    graph.graph['created'] = str(datetime.datetime.utcnow())
 
     # add whatever other metadata the user wants to add
     for key, value in other_fields.items():
