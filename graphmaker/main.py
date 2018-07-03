@@ -41,6 +41,10 @@ def save(graph, location):
 
 def add_columns_from_csv_to_graph(graph, csv_path, id_column, columns=None):
     table = pandas.read_csv(csv_path)
+    add_columns_from_df_to_graph(graph, table, id_column, columns)
+
+
+def add_columns_from_df_to_graph(graph, table, id_column, columns=None):
     if not columns:
         columns = [column for column in table.columns if column != id_column]
     return add_columns_and_report(graph, table, columns, id_column)
