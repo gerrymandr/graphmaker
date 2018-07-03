@@ -25,11 +25,10 @@ def test_graph_statistics_works_on_small_example():
     # max degree 3
     edges = [(1, 2), (2, 3), (4, 2), (4, 1), (4, 3), (3, 5)]
     graph = networkx.Graph(edges)
-    counts = Counter([3, 3, 3, 2, 1])
     expected = {'number_of_nodes': 5,
                 'number_of_edges': 6,
                 'degree_statistics':
-                    {'counts': counts,
+                    {'counts': {3: 3, 2: 1, 1: 1},
                      'min': 1,
                      'max': 3,
                      'mean': 2.4,
