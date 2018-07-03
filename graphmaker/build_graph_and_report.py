@@ -8,10 +8,12 @@ import networkx
 from make_graph import construct_graph_from_df
 from reports import report, rook_vs_queen
 
+logging.basicConfig(level=logging.DEBUG)
+
 
 def find_column_with(columns, pattern):
     candidates = [col for col in columns if 'id' in col.strip().lower()]
-    if len(candidates == 1):
+    if len(candidates) == 1:
         return candidates[0]
     else:
         return None
@@ -59,10 +61,10 @@ def save_graphs(rook_graph, queen_graph):
     save(queen_graph, './graphs/out_queen.json')
 
 
-def build_reports(rook_graph, queen_graph, df):
+def build_reports(rook_graph, queen_graph):
     logging.info('Building reports for rook- and queen-adjacency graphs.')
-    rook_synopsis = report(rook_graph, df)
-    queen_synopsis = report(queen_graph, df)
+    rook_synopsis = report(rook_graph)
+    queen_synopsis = report(queen_graph)
 
     logging.info('Comparing rook- and queen-adjacency graphs.')
     comparison = {"rook_vs_queen_comparison": rook_vs_queen(
@@ -81,13 +83,13 @@ def save(graph, location):
         logging.error('Unable to write the graphs to file.')
 
 
-def main(shapefile, id_column='GEOID10', *data_columns):
-    rook, queen, df = construct_rook_and_queen_graphs(
-        shapefile, id_column, data_columns)
+def main(args):
+    rook, queen = construct_rook_and_queen_graphs(
+        "C:\\Users\\maxhu\\Downloads\\tl_2012_26_vtd10\\tl_2012_26_vtd10.shp", "GEOID10", None)
 
     save_graphs(rook, queen)
 
-    return build_reports(rook, queen, df)
+    return build_reports(rook, queen)
 
 
 if __name__ == '__main__':
