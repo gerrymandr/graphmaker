@@ -34,7 +34,7 @@ def infer_id_column(dataframe, id_column=None):
                          'a plausible id_column in the dataframe.')
 
 
-def add_metadata(graph, df, **kwargs):
+def add_metadata(graph, df, **other_fields):
     state_col = find_column_with(df.columns, 'state')
     if state_col:
         graph.graph['state'] = df[state_col][0]
@@ -42,7 +42,7 @@ def add_metadata(graph, df, **kwargs):
     graph.graph['created'] = datetime.datetime.utcnow()
 
     # add whatever other metadata the user wants to add
-    for key, value in kwargs:
+    for key, value in other_fields.items():
         graph.graph[key] = value
 
 

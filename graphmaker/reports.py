@@ -90,7 +90,7 @@ def rook_vs_queen(rook_graph, queen_graph):
             'number_of_queen_edges': len(queen_edges),
             'common_edges': intersection,
             'symmetric_difference': difference,
-            'percent_common': intersection / (intersection + difference)}
+            'percent_common': round(intersection / (intersection + difference), 3)}
 
 
 def report(graph, reports=[graph_statistics, number_connected_components,
