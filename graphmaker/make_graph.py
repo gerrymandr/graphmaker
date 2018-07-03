@@ -59,7 +59,7 @@ def add_data_to_graph(df, graph, col_names, id_col=None):
                 graph.nodes[i][name] = data
 
 
-def construct_graph_from_df(df, geoid_col=None, cols_to_add=None):
+def construct_graph_from_df(df, geoid_col=None, cols_to_add=None, queen=False):
     """Construct initial graph from information about neighboring VTDs.
 
     :df: Geopandas dataframe.
@@ -70,8 +70,12 @@ def construct_graph_from_df(df, geoid_col=None, cols_to_add=None):
         df = df.set_index(geoid_col)
 
     # Generate rook neighbor lists from dataframe.
-    neighbors = ps.weights.Rook.from_dataframe(
-        df, geom_col="geometry").neighbors
+    if queen:
+        neighbors = ps.weights.Queen.from_dataframe(
+            df, geom_col="geometry").neighbors
+    else:
+        neighbors = ps.weights.Rook.from_dataframe(
+            df, geom_col="geometry").neighbors
 
     vtds = {}
 
