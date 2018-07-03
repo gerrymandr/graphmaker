@@ -1,7 +1,8 @@
+import numpy
 
 
-def serialize_histogram(hist):
-    counts, bin_endpoints = hist
+def serializable_histogram(data):
+    counts, bin_endpoints = numpy.histogram(data, bins='auto')
     counts = list(map(int, counts))
     bins = list()
     for left, right in zip(bin_endpoints[:-1], bin_endpoints[1:]):

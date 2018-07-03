@@ -5,7 +5,7 @@ from collections import Counter
 import networkx
 import numpy
 import scipy
-from graphmaker.data_utils import serialize_histogram
+from graphmaker.data_utils import serializable_histogram
 
 # import planarity
 
@@ -42,8 +42,8 @@ def eigenvalues_hist(graph):
     laplacian = networkx.laplacian_matrix(graph).todense()
     eigenvalues = numpy.real(scipy.linalg.eigvals(
         laplacian).tolist())
-    hist = numpy.histogram(eigenvalues)
-    return {'eigenvalues_histogram': serialize_histogram(hist)}
+    hist = serializable_histogram(eigenvalues)
+    return {'eigenvalues_histogram': hist}
 
 
 def number_connected_components(graph):

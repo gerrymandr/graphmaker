@@ -2,9 +2,8 @@ import datetime
 import statistics
 
 import networkx
-import numpy
 
-from data_utils import serialize_histogram
+from data_utils import serializable_histogram
 
 
 def add_column_to_graph(graph, column):
@@ -12,7 +11,7 @@ def add_column_to_graph(graph, column):
 
 
 def summary(data):
-    hist = serialize_histogram(numpy.histogram(data, bins='auto'))
+    hist = serializable_histogram(data)
     return {'mean': round(statistics.mean(data), 6),
             'median': round(statistics.mean(data), 6),
             'max': max(data),

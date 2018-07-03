@@ -67,6 +67,13 @@ def main():
     return build_reports(rook, queen)
 
 
+def just_reports():
+    with open('./graphs/01.json', 'r') as document:
+        data = json.load(document)
+    graph = networkx.readwrite.json_graph.adjacency_graph(data)
+    return report(graph)
+
+
 if __name__ == '__main__':
-    result = main()
+    result = just_reports()
     print(json.dumps(result, indent=2))
