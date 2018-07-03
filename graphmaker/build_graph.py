@@ -8,7 +8,7 @@ from make_graph import construct_graph_from_df
 
 
 def find_column_with(columns, pattern):
-    candidates = [col for col in columns if 'id' in col.strip().lower()]
+    candidates = [col for col in columns if pattern in col.strip().lower()]
     if len(candidates) == 1:
         return candidates[0]
     else:
