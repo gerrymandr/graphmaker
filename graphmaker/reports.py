@@ -3,8 +3,19 @@ import statistics
 from collections import Counter
 
 import networkx
+import numpy
+import scipy
 
 # import planarity
+
+
+def serializable_histogram(data):
+    counts, bin_endpoints = numpy.histogram(data, bins='auto')
+    counts = list(map(int, counts))
+    bins = list()
+    for left, right in zip(bin_endpoints[:-1], bin_endpoints[1:]):
+        bins.append([round(float(left), 6), round(float(right), 6)])
+    return {'bins': bins, 'counts': counts}
 
 
 def edge_set(edges):
@@ -22,6 +33,7 @@ def graph_statistics(graph):
     max_degree = max(degree_counts.keys())
     mean_degree = round(statistics.mean(degrees), 6)
     median_degree = statistics.median(degrees)
+    variance = round(statistics.variance(degrees), 6)
     return {'number_of_nodes': graph.number_of_nodes(),
             'number_of_edges': graph.number_of_edges(),
             'degree_statistics': {
@@ -29,8 +41,17 @@ def graph_statistics(graph):
                 'min': min_degree,
                 'max': max_degree,
                 'mean': mean_degree,
-                'median': median_degree
+                'median': median_degree,
+                'variance': variance
     }}
+
+
+def eigenvalues_hist(graph):
+    laplacian = networkx.laplacian_matrix(graph).todense()
+    eigenvalues = numpy.real(scipy.linalg.eigvals(
+        laplacian).tolist())
+    hist = serializable_histogram(eigenvalues)
+    return {'eigenvalues_histogram': hist}
 
 
 def number_connected_components(graph):
@@ -68,10 +89,11 @@ def rook_vs_queen(rook_graph, queen_graph):
     return {'number_of_rook_edges': len(rook_edges),
             'number_of_queen_edges': len(queen_edges),
             'common_edges': intersection,
-            'symmetric_difference': difference}
+            'symmetric_difference': difference,
+            'percent_common': intersection / (intersection + difference)}
 
 
 def report(graph, reports=[graph_statistics, number_connected_components,
                            # planar,
-                           unit_contained_in_another]):
+                           unit_contained_in_another, eigenvalues_hist]):
     return functools.reduce(lambda doc, f: {**doc, **f(graph)}, reports, dict())

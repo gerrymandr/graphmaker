@@ -1,10 +1,12 @@
+import json
 from unittest.mock import Mock
 
 import networkx
-
-from graphmaker.reports import (edge_set, graph_statistics,
+import numpy
+from graphmaker.reports import (edge_set, eigenvalues_hist, graph_statistics,
                                 number_connected_components, report,
-                                rook_vs_queen, unit_contained_in_another)
+                                rook_vs_queen, serializable_histogram,
+                                unit_contained_in_another)
 
 
 def test_edge_set_is_insensitive_to_order_of_nodes():
@@ -31,7 +33,8 @@ def test_graph_statistics_works_on_small_example():
                      'min': 1,
                      'max': 3,
                      'mean': 2.4,
-                     'median': 3}
+                     'median': 3,
+                     'variance': 0.8}
                 }
     assert graph_statistics(graph) == expected
 
@@ -82,6 +85,7 @@ def test_rook_vs_queen_works_on_a_small_example():
     assert result['number_of_queen_edges'] == 6
     assert result['common_edges'] == 4
     assert result['symmetric_difference'] == 2
+    assert abs(result['percent_common'] - 0.66) <= 0.01
 
 
 def test_report_calls_every_function():
@@ -93,3 +97,19 @@ def test_report_calls_every_function():
 
     report(mock_graph, mock_reports)
     assert all(mock.call_count == 1 for mock in mock_reports)
+
+
+def test_eigenvalues_hist_returns_floats_and_ints():
+    graph = networkx.Graph([(0, 1), (1, 2), (2, 3), (3, 0)])
+    hist = eigenvalues_hist(graph)['eigenvalues_histogram']
+    for left, right in hist['bins']:
+        assert isinstance(left, float)
+        assert isinstance(right, float)
+    for count in hist['counts']:
+        assert isinstance(count, int)
+
+
+def test_serializable_histogram_returns_serializable():
+    data = numpy.random.normal(size=100)
+    serialized = json.dumps(serializable_histogram(data))
+    assert serialized
