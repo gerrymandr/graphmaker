@@ -1,4 +1,5 @@
 import datetime
+import numbers
 import statistics
 
 import networkx
@@ -7,11 +8,13 @@ from constants import round_to
 from reports import serializable_histogram
 
 
-def add_column_to_graph(graph, column):
-    networkx.set_node_attributes(graph, column)
+def add_column_to_graph(graph, column, attribute_name):
+    networkx.set_node_attributes(graph, column, attribute_name)
 
 
 def summary(data):
+    if not isinstance(data[0], numbers.Number):
+        return {'type': str(type(data[0]))}
     hist = serializable_histogram(data)
     return {'mean': round(statistics.mean(data), round_to),
             'median': round(statistics.mean(data), round_to),
@@ -22,12 +25,13 @@ def summary(data):
 
 
 def zeros(data):
-    zeros = [n for n in data if n == 0]
+    zeros = [n for n in data if not n]
     return {'number_of_zeros': len(zeros), 'percent_zero': len(zeros)/len(data)}
 
 
 def column_statistics(column):
-    data = list(column.values())
+    data = list(column)
+    print(data)
     return {**summary(data), **zeros(data)}
 
 
@@ -55,6 +59,6 @@ def add_columns_and_report(graph, table, columns, id_column):
 
     for column in columns:
         data = map_ids_to_column_entries(table, id_column, column)
-        add_column_to_graph(graph, data)
+        add_column_to_graph(graph, data, column)
     return [column_report(table, column_name, graph)
             for column_name in columns]
