@@ -5,7 +5,6 @@ from collections import Counter
 import networkx
 import numpy
 import scipy
-
 from constants import round_to
 
 # import planarity
