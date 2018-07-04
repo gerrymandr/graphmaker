@@ -4,7 +4,8 @@ import utm
 
 
 def utm_of_point(point):
-    return utm.from_latlon(point.x, point.y)[2]
+    print(point.y, point.x)
+    return utm.from_latlon(point.y, point.x)[2]
 
 
 def identify_utm_zone(df):

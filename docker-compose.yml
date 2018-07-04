@@ -7,6 +7,8 @@ services:
     - ./graphmaker:/code
     links:
     - mongo
+    stdin_open: true
+    tty: true
   mongo:
     image: mongo
     environment:
