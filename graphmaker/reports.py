@@ -53,7 +53,7 @@ def eigenvalues_hist(graph):
     eigenvalues = numpy.real(scipy.linalg.eigvals(
         laplacian).tolist())
     hist = serializable_histogram(eigenvalues)
-    return {'eigenvalues_histogram': hist}
+    return {'eigenvalues_of_the_laplacian_histogram': hist}
 
 
 def number_connected_components(graph):
