@@ -9,7 +9,7 @@ def zfill2(x):
     return str(x).zfill(2)
 
 
-fips_codes = ['01', '02'] + list(map(zfill2, range(4, 57)))
+fips_codes = ['01', '02', '04', '05', '06'] + list(map(zfill2, range(8, 57)))
 
 
 def state_zip_url(fips, year='2012'):
