@@ -1,0 +1,16 @@
+version: '3.3'
+
+services: 
+  graphmaker:
+    build: .
+    volumes:
+    - ./graphmaker:/code
+    links:
+    - mongo
+  mongo:
+    image: mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    volumes:
+    - ./mongodata:/data/db
