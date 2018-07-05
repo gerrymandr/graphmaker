@@ -42,6 +42,9 @@ def add_metadata(graph, df, **other_fields):
     state_col = find_column_with(df.columns, 'state')
     if state_col:
         graph.graph['state'] = df[state_col][0]
+    else:
+        # Rhode island's special shapefiles are the only ones without
+        graph.graph['state'] = '44'
     graph.graph['id'] = generate_id()
     graph.graph['created'] = str(datetime.datetime.utcnow())
 
@@ -52,6 +55,7 @@ def add_metadata(graph, df, **other_fields):
 
 def construct_rook_and_queen_graphs(shapefile, id_column=None, data_columns=None):
     df = geopandas.read_file(shapefile)
+    df = df.to_crs({'init': 'epsg:4326'})
 
     id_column = infer_id_column(df, id_column)
     df.index = df[id_column]

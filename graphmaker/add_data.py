@@ -1,4 +1,3 @@
-import os
 
 import geopandas as gp
 
@@ -31,6 +30,7 @@ for state in states:
         rook_graph, data, ['ALAND10', 'AWATER10', 'NAME10', 'COUNTYFP10'], 'GEOID10')
     print(result)
     queen_graph = load_graph(queen)
-    result = add_columns_and_report(queen_graph, data, ['ALAND10', 'AWATER10', 'NAME10', 'COUNTYFP10'], 'GEOID10')
+    result = add_columns_and_report(
+        queen_graph, data, ['ALAND10', 'AWATER10', 'NAME10', 'COUNTYFP10'], 'GEOID10')
     save_graphs(rook_graph, queen_graph)
     print(result)

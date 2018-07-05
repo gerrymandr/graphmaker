@@ -64,10 +64,14 @@ def add_columns_from_df_to_graph(graph, table, id_column, columns=None):
 def main(args):
     path = args[0]
 
+    id_column = None
+    if len(args) > 1:
+        id_column = args[1]
+
     if not path:
         raise ValueError('Please specify a shapefile to turn into a graph.')
 
-    rook, queen = construct_rook_and_queen_graphs(path)
+    rook, queen = construct_rook_and_queen_graphs(path, id_column=id_column)
     save_graphs(rook, queen)
 
     result = build_reports(rook, queen)
