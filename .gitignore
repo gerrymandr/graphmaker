@@ -5,3 +5,4 @@ __pycache__/
 graphs/
 tiger_data/
 build/
+mongodata/

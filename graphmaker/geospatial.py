@@ -4,7 +4,6 @@ import utm
 
 
 def utm_of_point(point):
-    print(point.y, point.x)
     return utm.from_latlon(point.y, point.x)[2]
 
 
