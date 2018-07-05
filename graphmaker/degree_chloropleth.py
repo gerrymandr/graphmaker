@@ -1,13 +1,14 @@
 import os
+
 import geopandas as gp
 import matplotlib
+import matplotlib.pyplot as plt
+
+from geospatial import reprojected
+from main import load_graph
 
 matplotlib.use('Agg')
 
-import matplotlib.pyplot as plt
-
-from main import load_graph
-from geospatial import reprojected
 
 def shapefile_path(fips):
     return '/'.join(['.', 'tiger_data', fips, 'tl_2012_' + fips + '_vtd10.shp'])
