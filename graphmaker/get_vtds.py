@@ -1,8 +1,7 @@
-import io
 import os
-import zipfile
 
-import requests
+from constants import tiger_data_path
+from utils import download_and_unzip
 
 
 def zfill2(x):
@@ -18,7 +17,7 @@ def state_zip_url(fips, year='2012'):
 
 
 def target_folder(fips):
-    return "./tiger_data/" + fips
+    return os.path.join(tiger_data_path, fips)
 
 
 def shp_location(fips, year='2012'):
@@ -26,13 +25,7 @@ def shp_location(fips, year='2012'):
 
 
 def download_state_vtds(fips):
-    response = requests.get(state_zip_url(fips))
-    z = zipfile.ZipFile(io.BytesIO(response.content))
-    z.extractall(target_folder(fips))
-
-
-def output_location(fips):
-    return "./graphs/" + fips + ".json"
+    download_and_unzip(state_zip_url(fips), target_folder(fips))
 
 
 def main():

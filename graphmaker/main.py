@@ -2,13 +2,13 @@ import json
 import logging
 import os
 import pathlib
-import sys
 
 import networkx
 import pandas
 
 from add_columns import add_columns_and_report
 from build_graph import construct_rook_and_queen_graphs
+from constants import graphs_base_path
 from reports import report, rook_vs_queen
 
 logging.basicConfig(level=logging.DEBUG)
@@ -33,15 +33,15 @@ def save_graphs(rook_graph, queen_graph):
 
     # Ensure that the paths exist:
     state = rook_graph.graph['state']
-    path = f"./graphs/{state}/"
-    pathlib.Path(f"./graphs/{state}/").mkdir(parents=True, exist_ok=True)
+    path = os.path.join(graphs_base_path, state)
+    pathlib.Path(path).mkdir(parents=True, exist_ok=True)
 
     # Save the graphs in their respective homes:
     save(rook_graph, filepath=os.path.join(path, 'rook.json'))
     save(queen_graph, filepath=os.path.join(path, 'queen.json'))
 
 
-def save(graph, location='./graphs/', filepath=None):
+def save(graph, location=graphs_base_path, filepath=None):
     if not filepath:
         filepath = os.path.join(location, graph.graph['id'] + ".json")
     data = networkx.readwrite.json_graph.adjacency_data(graph)
@@ -64,16 +64,20 @@ def add_columns_from_df_to_graph(graph, table, id_column, columns=None):
 def main(args):
     path = args[0]
 
+    id_column = None
+    if len(args) > 1:
+        id_column = args[1]
+
     if not path:
         raise ValueError('Please specify a shapefile to turn into a graph.')
 
-    rook, queen = construct_rook_and_queen_graphs(path)
+    rook, queen = construct_rook_and_queen_graphs(path, id_column=id_column)
     save_graphs(rook, queen)
 
     result = build_reports(rook, queen)
 
     state = rook.graph['state']
-    with open(f"./graphs/{state}/report.json", 'w') as f:
+    with open(os.path.join(graphs_base_path, state, "report.json"), 'w') as f:
         f.write(json.dumps(result, indent=2))
     return result
 
@@ -86,5 +90,4 @@ def load_graph(path):
 
 
 if __name__ == '__main__':
-    result = main(sys.argv[1:])
-    print(json.dumps(result, indent=2))
+    pass
