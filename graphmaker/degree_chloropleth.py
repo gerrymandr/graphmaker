@@ -35,12 +35,14 @@ def degree_chloropleth(fips, id_column='GEOID10'):
 
     df.plot(column='rook_degree')
     rook_png_path = os.path.join(graphs_base_path, fips, 'rook.png')
+
     if os.path.isfile(rook_png_path):
         os.remove(rook_png_path)
     plt.savefig(rook_png_path)
 
     df.plot(column='queen_degree')
     queen_png_path = os.path.join(graphs_base_path, fips, 'queen.png')
+
     if os.path.isfile(queen_png_path):
         os.remove(queen_png_path)
     plt.savefig(queen_png_path)
