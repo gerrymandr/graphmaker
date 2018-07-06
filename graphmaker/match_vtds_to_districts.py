@@ -89,7 +89,7 @@ def graph_path(fips, adjacency='rook'):
     return os.path.join(graphs_base_path, fips, adjacency + '.json')
 
 
-def match_vtds_to_districts(fips, district='CD', split_percentages):
+def match_vtds_to_districts(fips, split_percentages, district='CD'):
     logging.info(f"Loading blocks for fips code {fips}")
     blocks_to_cds = pandas.read_csv(
         block_to_unit_filepath(fips, district), index_col='BLOCKID', dtype=str)
