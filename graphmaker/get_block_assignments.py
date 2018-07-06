@@ -1,9 +1,6 @@
-import io
-import zipfile
-
-import requests
 
 from constants import fips_to_state_abbreviation
+from utils import download_and_unzip
 
 
 def baf_url(fips):
@@ -17,9 +14,7 @@ def target_folder(fips):
 
 
 def download_baf(fips):
-    response = requests.get(baf_url(fips))
-    z = zipfile.ZipFile(io.BytesIO(response.content))
-    z.extractall(target_folder(fips))
+    download_and_unzip(baf_url(fips), target_folder(fips))
 
 
 def main():
