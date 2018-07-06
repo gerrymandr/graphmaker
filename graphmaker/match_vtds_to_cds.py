@@ -4,11 +4,10 @@ from collections import Counter
 import numpy
 import pandas
 
-from constants import fips_to_state_abbreviation
+from constants import fips_to_state_abbreviation, fips_to_state_name
 from main import load_graph
 
 logging.basicConfig(level=logging.INFO)
-
 
 # The VTDs have GEOIDs of this form:
 # {2-digit state FIPS}{3-digit county code}{>=2-digit VTD code}
@@ -55,10 +54,10 @@ def patch_value_from_neighbors(node, series, graph):
 
     best_guess, count = neighbor_values.most_common(1)[0]
     degree = graph.degree[node]
-    percent = round(count/degree, 2) * 100
+    percent = round((count/degree) * 100, 2)
 
     logging.info(f"{percent}% of {node}'s neighbors have value {best_guess},"
-                 f" so we our guessed value for {node} is {best_guess}.")
+                 f" so our best-guess value for {node} is {best_guess}.")
 
     return best_guess
 
@@ -99,14 +98,20 @@ def create_matching_for_state(fips, output_file):
     vtds_to_cds = match_vtds_to_cds(fips)
 
     logging.info("I created a matching of VTDs to CDs.")
-    logging.info(vtds_to_cds[vtds_to_cds.isna()])
+    number_missing = len(vtds_to_cds[vtds_to_cds.isna()])
+    logging.info(
+        f"Remaining missing values: {number_missing}")
 
     logging.info("Writing output to " + output_file)
     vtds_to_cds.to_csv(output_file)
 
 
 def main():
-    create_matching_for_state('26', './26.csv')
+    for fips in fips_to_state_name:
+        if fips == '21' or fips == '44' or int(fips) <= 21:
+            continue
+        logging.info(f"Working on {fips_to_state_name[fips]}")
+        create_matching_for_state(fips, f"./cd_matchings/{fips}.csv")
 
 
 if __name__ == '__main__':
