@@ -1,5 +1,10 @@
 round_to = 3
 
+
+graphs_base_path = './graphs/vtd-adjacency-graphs/vtd-adjacency-graphs/'
+tiger_data_path = './tiger_data/'
+cd_matchings_path = './cd_matchings/'
+
 fips_to_state_abbreviation = {'01': 'AL', '02': 'AK', '04': 'AZ', '05': 'AR', '06': 'CA',
                               '08': 'CO', '09': 'CT', '10': 'DE', '11': 'DC', '12': 'FL',
                               '13': 'GA', '15': 'HI', '16': 'ID', '17': 'IL', '18': 'IN',
@@ -39,3 +44,9 @@ def generate_constants():
             fips_to_state_name[fips] = name
     print(fips_to_state_abbreviation)
     print(fips_to_state_name)
+
+
+def valid_fips_codes():
+    for fips in fips_to_state_name:
+        if fips != '21' and fips != '44':
+            yield fips

@@ -9,6 +9,7 @@ import pandas
 
 from add_columns import add_columns_and_report
 from build_graph import construct_rook_and_queen_graphs
+from constants import graphs_base_path
 from reports import report, rook_vs_queen
 
 logging.basicConfig(level=logging.DEBUG)
@@ -33,15 +34,15 @@ def save_graphs(rook_graph, queen_graph):
 
     # Ensure that the paths exist:
     state = rook_graph.graph['state']
-    path = f"./graphs/{state}/"
-    pathlib.Path(f"./graphs/{state}/").mkdir(parents=True, exist_ok=True)
+    path = os.path.join(graphs_base_path, state)
+    pathlib.Path(path).mkdir(parents=True, exist_ok=True)
 
     # Save the graphs in their respective homes:
     save(rook_graph, filepath=os.path.join(path, 'rook.json'))
     save(queen_graph, filepath=os.path.join(path, 'queen.json'))
 
 
-def save(graph, location='./graphs/', filepath=None):
+def save(graph, location=graphs_base_path, filepath=None):
     if not filepath:
         filepath = os.path.join(location, graph.graph['id'] + ".json")
     data = networkx.readwrite.json_graph.adjacency_data(graph)
@@ -77,7 +78,7 @@ def main(args):
     result = build_reports(rook, queen)
 
     state = rook.graph['state']
-    with open(f"./graphs/{state}/report.json", 'w') as f:
+    with open(os.path.join(graphs_base_path, state, "report.json"), 'w') as f:
         f.write(json.dumps(result, indent=2))
     return result
 

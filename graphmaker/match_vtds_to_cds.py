@@ -4,7 +4,8 @@ from collections import Counter
 import numpy
 import pandas
 
-from constants import fips_to_state_abbreviation, fips_to_state_name
+from constants import (fips_to_state_abbreviation, fips_to_state_name,
+                       valid_fips_codes)
 from main import load_graph
 
 logging.basicConfig(level=logging.INFO)
@@ -106,12 +107,18 @@ def create_matching_for_state(fips, output_file):
     vtds_to_cds.to_csv(output_file)
 
 
-def main():
-    for fips in fips_to_state_name:
-        if fips == '21' or fips == '44' or int(fips) <= 21:
-            continue
+def create_matchings_for_every_state():
+    for fips in valid_fips_codes():
         logging.info(f"Working on {fips_to_state_name[fips]}")
         create_matching_for_state(fips, f"./cd_matchings/{fips}.csv")
+
+
+def add_matching_to_graphs():
+    pass
+
+
+def main():
+    pass
 
 
 if __name__ == '__main__':
