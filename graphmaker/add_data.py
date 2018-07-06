@@ -54,7 +54,7 @@ def add_basic_data_from_census_shapefiles():
 def add_cds_to_graphs():
     for state in valid_fips_codes():
         cds = pandas.read_csv(os.path.join(
-            cd_matchings_path, state + '.csv'), header=None, names=['geoid', 'CD'])
+            cd_matchings_path, state + '.csv'), dtype=str, header=None, names=['geoid', 'CD'])
         add_data_from_dataframe(state, cds, ['CD'], 'geoid')
 
 

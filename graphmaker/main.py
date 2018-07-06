@@ -2,7 +2,6 @@ import json
 import logging
 import os
 import pathlib
-import sys
 
 import networkx
 import pandas
@@ -91,5 +90,4 @@ def load_graph(path):
 
 
 if __name__ == '__main__':
-    result = main(sys.argv[1:])
-    print(json.dumps(result, indent=2))
+    pass
