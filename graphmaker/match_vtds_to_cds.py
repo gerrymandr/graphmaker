@@ -1,11 +1,12 @@
 import logging
+import os
 from collections import Counter
 
 import numpy
 import pandas
 
-from constants import (fips_to_state_abbreviation, fips_to_state_name,
-                       valid_fips_codes)
+from constants import (cd_matchings_path, fips_to_state_abbreviation,
+                       fips_to_state_name, graphs_base_path, valid_fips_codes)
 from main import load_graph
 
 logging.basicConfig(level=logging.INFO)
@@ -19,7 +20,7 @@ logging.basicConfig(level=logging.INFO)
 
 # The block assignment files are in this directory on my computer
 # (at the same level as the outer graphmaker folder):
-baf_path = "../../block_assignments/block_assignments/"
+baf_path = '../../block_assignments/block_assignments/'
 
 # The block assignment files are named like:
 # "BlockAssign_ST{fips}_{2-digit state abbreviation}_{matched unit}
@@ -29,7 +30,7 @@ baf_path = "../../block_assignments/block_assignments/"
 def block_to_unit_filepath(fips, unit):
     """The units are all-caps: 'VTD' or 'CD'"""
     abbrev = fips_to_state_abbreviation[fips]
-    return baf_path + fips + "/" + f"BlockAssign_ST{fips}_{abbrev}_{unit}.txt"
+    return os.path.join(baf_path, fips, f"BlockAssign_ST{fips}_{abbrev}_{unit}.txt")
 
 # Our objective will be to make a VTD-to-CD assignment CSV.
 
@@ -69,12 +70,11 @@ def choose_most_common(group):
 
 
 def graph_path(fips, adjacency='rook'):
-    base = "./graphs/vtd-adjacency-graphs/vtd-adjacency-graphs/"
-    return base + fips + "/" + adjacency + ".json"
+    return os.path.join(graphs_base_path, fips, adjacency + '.json')
 
 
 def match_vtds_to_cds(fips):
-    logging.info("Loading blocks for fips code " + fips)
+    logging.info(f"Loading blocks for fips code {fips}")
     blocks_to_cds = pandas.read_csv(
         block_to_unit_filepath(fips, 'CD'), index_col='BLOCKID', dtype=str)
 
@@ -82,7 +82,7 @@ def match_vtds_to_cds(fips):
     blocks_to_vtds['cd'] = blocks_to_cds['DISTRICT']
 
     logging.info(
-        "Matching each VTD to the most common CD assignment of the blocks in the VTD.")
+        'Matching each VTD to the most common CD assignment of the blocks in the VTD.')
 
     grouped_by_vtd = blocks_to_vtds.groupby('geoid')
     vtds_to_cds = grouped_by_vtd['cd'].aggregate(choose_most_common)
@@ -98,23 +98,20 @@ def match_vtds_to_cds(fips):
 def create_matching_for_state(fips, output_file):
     vtds_to_cds = match_vtds_to_cds(fips)
 
-    logging.info("I created a matching of VTDs to CDs.")
+    logging.info('I created a matching of VTDs to CDs.')
     number_missing = len(vtds_to_cds[vtds_to_cds.isna()])
     logging.info(
         f"Remaining missing values: {number_missing}")
 
-    logging.info("Writing output to " + output_file)
+    logging.info(f"Writing output to {output_file}")
     vtds_to_cds.to_csv(output_file)
 
 
 def create_matchings_for_every_state():
     for fips in valid_fips_codes():
         logging.info(f"Working on {fips_to_state_name[fips]}")
-        create_matching_for_state(fips, f"./cd_matchings/{fips}.csv")
-
-
-def add_matching_to_graphs():
-    pass
+        create_matching_for_state(fips, os.path.join(
+            cd_matchings_path, fips + '.csv'))
 
 
 def main():
