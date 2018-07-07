@@ -6,7 +6,7 @@ import networkx
 import numpy
 import scipy
 
-from constants import round_to
+from .constants import round_to
 
 # import planarity
 

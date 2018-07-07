@@ -101,7 +101,7 @@ def test_report_calls_every_function():
 
 def test_eigenvalues_hist_returns_floats_and_ints():
     graph = networkx.Graph([(0, 1), (1, 2), (2, 3), (3, 0)])
-    hist = eigenvalues_hist(graph)['eigenvalues_histogram']
+    hist = eigenvalues_hist(graph)['eigenvalues_of_the_laplacian_histogram']
     for left, right in hist['bins']:
         assert isinstance(left, float)
         assert isinstance(right, float)
