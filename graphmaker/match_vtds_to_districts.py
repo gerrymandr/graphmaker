@@ -15,9 +15,7 @@ from main import load_graph
 # import matplotlib.pyplot as plt
 
 
-logging.basicConfig(level=logging.INFO,
-                    handlers=[logging.StreamHandler(),
-                              logging.FileHandler('./matching.log')])
+# logging.basicConfig(level=logging.INFO)
 
 # The VTDs have GEOIDs of this form:
 # {2-digit state FIPS}{3-digit county code}{>=2-digit VTD code}

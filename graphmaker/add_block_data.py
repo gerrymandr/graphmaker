@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import pathlib
@@ -7,7 +8,7 @@ import pandas
 
 from add_data import add_data_from_dataframe
 from constants import (block_population_path, fips_to_state_name,
-                       valid_fips_codes)
+                       graphs_base_path, valid_fips_codes)
 from match_vtds_to_districts import integrate_over_blocks_in_vtds
 from utils import download_and_unzip
 
@@ -61,15 +62,21 @@ def main():
     for fips in valid_fips_codes():
         state = fips_to_state_name[fips]
 
-        logging.info('Downloading block-level data for ' + state + '.')
-        download_blocks_for_state(fips)
+        # logging.info('Downloading block-level data for ' + state + '.')
+        # download_blocks_for_state(fips)
 
         logging.info(
             'Aggregating block-level population data for ' + state + '.')
 
         vtd_pops = vtd_populations_from_blocks(fips)
+        vtd_pops['geoid'] = vtd_pops.index
 
-        add_data_from_dataframe(fips, vtd_pops, ['POP10'], 'geoid')
+        population_report = add_data_from_dataframe(
+            fips, vtd_pops, ['POP10'], 'geoid')
+
+        with open(os.path.join(graphs_base_path, fips, 'pop10_report.json'), 'w') as f:
+            print(population_report)
+            f.write(json.dumps(population_report, indent=2, sort_keys=True))
 
 
 if __name__ == '__main__':
