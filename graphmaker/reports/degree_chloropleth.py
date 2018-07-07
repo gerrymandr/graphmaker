@@ -4,10 +4,10 @@ import geopandas as gp
 import matplotlib
 import matplotlib.pyplot as plt
 
-from add_data import get_graph_paths, get_shape_path
-from constants import graphs_base_path, valid_fips_codes
-from geospatial import reprojected
-from main import load_graph
+from .add_data import get_graph_paths, get_shape_path
+from .constants import graphs_base_path, valid_fips_codes
+from .geospatial import reprojected
+from .main import load_graph
 
 matplotlib.use('Agg')
 

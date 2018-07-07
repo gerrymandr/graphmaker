@@ -4,10 +4,9 @@ import geopandas as gp
 import networkx
 import pandas as pd
 import pysal as ps
+from graphmaker.geospatial import reprojected
 from networkx.readwrite import json_graph
 from shapely.ops import cascaded_union
-
-from geospatial import reprojected
 
 
 def get_list_of_data(filepath, col_name, geoid=None):

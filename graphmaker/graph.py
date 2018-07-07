@@ -37,11 +37,13 @@ class Graph:
             json.dump(data, f)
         logging.info(f"Saved the graph to {filepath}")
 
-    def add_columns_from_csv(self, csv_path, id_column, columns=None):
+    def add_columns_from_csv(self, csv_path, columns=None, id_column=None):
         table = pandas.read_csv(csv_path)
-        self.add_columns_from_df(table, id_column, columns)
+        self.add_columns_from_df(table, columns, id_column)
 
-    def add_columns_from_df(self, table, id_column, columns=None):
+    def add_columns_from_df(self, table, columns=None, id_column=None):
+        if not id_column:
+            id_column = infer_id_column(table, id_column)
         if not columns:
             columns = [column for column in table.columns
                        if column != id_column]
@@ -58,13 +60,13 @@ class RookAndQueenGraphs:
         self.fips = rook.graph.graph['state']
 
     @classmethod
-    def load(cls, fips):
-        rook = Graph.load(cls.path('rook'))
-        queen = Graph.load(cls.path('queen'))
+    def load_fips(cls, fips):
+        rook = Graph.load(cls.path(fips, 'rook'))
+        queen = Graph.load(cls.path(fips, 'queen'))
         return cls(rook, queen)
 
     @classmethod
-    def from_shapefile(cls, shapefile, id_column=None, data_columns=None):
+    def from_shapefile(cls, shapefile, data_columns=None,  id_column=None):
         logging.info(
             'Constructing adjacency graphs from shapefile ' + str(shapefile))
         df = geopandas.read_file(shapefile)
@@ -96,6 +98,14 @@ class RookAndQueenGraphs:
             raise ValueError(
                 'The parameter adjacency must be "rook", "queen", or None.')
         return os.path.join(graphs_base_path, fips, adjacency + '.json')
+
+    def add_columns_from_df(self, df, columns=None, id_column=None):
+        self.rook.add_columns_from_df(df,  columns, id_column)
+        self.queen.add_columns_from_df(df, columns, id_column)
+
+    def add_columns_from_shapefile(self, shapefile_path, columns=None, id_column=None):
+        df = geopandas.read_file(shapefile_path)
+        self.add_data_from_dataframe(self, df, columns, id_column)
 
     def save(self):
         logging.info('Saving graphs.')

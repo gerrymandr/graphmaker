@@ -6,10 +6,9 @@ from functools import partial
 import numpy
 import pandas
 
-from .constants import block_assignment_path as baf_path
-from .constants import (cd_matchings_path, fips_to_state_abbreviation,
-                        fips_to_state_name, graphs_base_path, valid_fips_codes)
-from .main import load_graph
+from .constants import cd_matchings_path, fips_to_state_name, valid_fips_codes
+from .graph import RookAndQueenGraphs
+from .resources import BlockAssignmentFile
 
 # import matplotlib
 # matplotlib.use('Agg')
@@ -34,16 +33,11 @@ from .main import load_graph
 # For example, BlockAssign_ST26_MI_CD assigns blocks to CDs in Michigan.
 
 
-def block_to_unit_filepath(fips, unit):
-    """The units are all-caps: 'VTD' or 'CD'"""
-    abbrev = fips_to_state_abbreviation[fips]
-    return os.path.join(baf_path, fips, f"BlockAssign_ST{fips}_{abbrev}_{unit}.txt")
-
 # Our objective will be to make a VTD-to-CD assignment CSV.
 
 
 def blocks_to_vtds_dataframe(fips, name_geoid_column='geoid'):
-    df = pandas.read_csv(block_to_unit_filepath(fips, 'VTD'), dtype=str)
+    df = BlockAssignmentFile(fips).as_df()
     df[name_geoid_column] = fips + df['COUNTYFP'] + df['DISTRICT']
     return df
 
@@ -98,15 +92,10 @@ def choose_most_common(group, dropna=False, split_percentages=None):
     return most_common
 
 
-def graph_path(fips, adjacency='rook'):
-    return os.path.join(graphs_base_path, fips, adjacency + '.json')
-
-
 def match_vtds_to_districts(fips, split_percentages, district='CD'):
     logging.info(f"Loading blocks for fips code {fips}")
 
-    blocks_to_cds = pandas.read_csv(
-        block_to_unit_filepath(fips, district), dtype=str)
+    blocks_to_cds = BlockAssignmentFile(fips).as_df(unit=district)
     blocks_to_cds = blocks_to_cds.set_index('BLOCKID')
 
     blocks_to_vtds = blocks_to_vtds_dataframe(fips)
@@ -120,7 +109,8 @@ def match_vtds_to_districts(fips, split_percentages, district='CD'):
     vtds_to_cds = grouped_by_vtd[district].aggregate(
         partial(choose_most_common, split_percentages=split_percentages))
 
-    graph = load_graph(graph_path(fips))
+    graph = RookAndQueenGraphs.load_fips(fips).rook.graph
+
     for node in vtds_to_cds[vtds_to_cds.isna()].index:
         vtds_to_cds[node] = patch_value_from_neighbors(
             node, vtds_to_cds, graph)

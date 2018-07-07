@@ -96,7 +96,7 @@ def rook_vs_queen(rook_graph, queen_graph):
             'percent_common': round(intersection / (intersection + difference), round_to)}
 
 
-def report(graph, reports=[graph_statistics, number_connected_components,
-                           # planar,
-                           unit_contained_in_another, eigenvalues_hist]):
+def graph_report(graph, reports=[graph_statistics, number_connected_components,
+                                 # planar,
+                                 unit_contained_in_another, eigenvalues_hist]):
     return functools.reduce(lambda doc, f: {**doc, **f(graph)}, reports, dict())

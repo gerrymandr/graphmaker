@@ -4,7 +4,7 @@ import uuid
 
 import geopandas
 
-from make_graph import construct_graph_from_df
+from .make_graph import construct_graph_from_df
 
 
 def find_column_with(columns, pattern):
