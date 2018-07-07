@@ -17,6 +17,7 @@ from main import load_graph
 
 # logging.basicConfig(level=logging.INFO)
 
+
 # The VTDs have GEOIDs of this form:
 # {2-digit state FIPS}{3-digit county code}{>=2-digit VTD code}
 
