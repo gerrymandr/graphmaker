@@ -6,9 +6,10 @@ from functools import partial
 import numpy
 import pandas
 
-from constants import (cd_matchings_path, fips_to_state_abbreviation,
-                       fips_to_state_name, graphs_base_path, valid_fips_codes)
-from main import load_graph
+from .constants import block_assignment_path as baf_path
+from .constants import (cd_matchings_path, fips_to_state_abbreviation,
+                        fips_to_state_name, graphs_base_path, valid_fips_codes)
+from .main import load_graph
 
 # import matplotlib
 # matplotlib.use('Agg')
@@ -27,7 +28,6 @@ from main import load_graph
 
 # The block assignment files are in this directory on my computer
 # (at the same level as the outer graphmaker folder):
-baf_path = '../../block_assignments/block_assignments/'
 
 # The block assignment files are named like:
 # "BlockAssign_ST{fips}_{2-digit state abbreviation}_{matched unit}

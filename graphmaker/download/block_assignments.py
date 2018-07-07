@@ -1,5 +1,6 @@
+import os
 
-from constants import fips_to_state_abbreviation
+from constants import block_assignment_path, fips_to_state_abbreviation
 from utils import download_and_unzip
 
 
@@ -10,7 +11,7 @@ def baf_url(fips):
 
 
 def target_folder(fips):
-    return './block_assignments/' + fips + '/'
+    return os.path.join(block_assignment_path, fips)
 
 
 def download_baf(fips):
