@@ -33,7 +33,6 @@ def zeros(data):
 
 def column_statistics(column):
     data = list(column)
-    print(data)
     return {**summary(data), **zeros(data)}
 
 
