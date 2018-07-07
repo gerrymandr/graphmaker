@@ -4,7 +4,8 @@ import os
 import geopandas as gp
 import pandas
 
-from constants import block_population_path, valid_fips_codes
+from constants import (block_population_path, fips_to_state_name,
+                       valid_fips_codes)
 from match_vtds_to_districts import integrate_over_blocks_in_vtds
 from utils import download_and_unzip
 
@@ -54,8 +55,11 @@ def population_csv_path(fips):
 
 def main():
     for fips in valid_fips_codes():
-        logging.info('Aggregating block-level population data')
-        create_table_from_block_level_data(fips, population_csv_path(fips))
+        if fips == '26':
+            state = fips_to_state_name[fips]
+            logging.info(
+                'Aggregating block-level population data for ' + state + '.')
+            create_table_from_block_level_data(fips, population_csv_path(fips))
 
 
 if __name__ == '__main__':
