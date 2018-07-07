@@ -1,27 +1,41 @@
 import json
+import logging
+import os
+import pathlib
 
+import geopandas
 import networkx
+import pandas
 
+from .build_graph import add_metadata, infer_id_column
 from .constants import graphs_base_path
+from .make_graph import construct_graph_from_df
+
+
+def map_ids_to_column_entries(table, id_column, data_column):
+    return dict(zip(table[id_column], table[data_column]))
+
+
+def add_column_to_graph(graph, column, attribute_name):
+    networkx.set_node_attributes(graph, column, attribute_name)
 
 
 class Graph:
-    def __init__(self):
-        rook =
+    def __init__(self, graph):
+        self.graph = graph
 
-    def _load(self, path):
+    @classmethod
+    def load(cls, path):
         with open(path, 'r') as document:
             data = json.load(document)
         graph = networkx.readwrite.json_graph.adjacency_graph(data)
-        return graph
+        return cls(graph)
 
-    def _save(self, graph, path):
-        if not filepath:
-            filepath = os.path.join(location, self.id + ".json")
-        data = networkx.readwrite.json_graph.adjacency_data(graph)
+    def save(self, filepath):
+        data = networkx.readwrite.json_graph.adjacency_data(self.graph)
         with open(filepath, 'w') as f:
             json.dump(data, f)
-        print(f"Saved the graph to {filepath}")
+        logging.info(f"Saved the graph to {filepath}")
 
     def add_columns_from_csv(self, csv_path, id_column, columns=None):
         table = pandas.read_csv(csv_path)
@@ -29,18 +43,66 @@ class Graph:
 
     def add_columns_from_df(self, table, id_column, columns=None):
         if not columns:
-            columns = [
-                column for column in table.columns if column != id_column]
-        return add_columns_and_report(self, table, columns, id_column)
+            columns = [column for column in table.columns
+                       if column != id_column]
+
+        for column in columns:
+            data = map_ids_to_column_entries(table, id_column, column)
+            add_column_to_graph(self.graph, data, column)
+
+
+class RookAndQueenGraphs:
+    def __init__(self, rook, queen):
+        self.rook = rook
+        self.queen = queen
+        self.fips = rook.graph.graph['state']
+
+    @classmethod
+    def load(cls, fips):
+        rook = Graph.load(cls.path('rook'))
+        queen = Graph.load(cls.path('queen'))
+        return cls(rook, queen)
+
+    @classmethod
+    def from_shapefile(cls, shapefile, id_column=None, data_columns=None):
+        logging.info(
+            'Constructing adjacency graphs from shapefile ' + str(shapefile))
+        df = geopandas.read_file(shapefile)
+        df = df.to_crs({'init': 'epsg:4326'})
+
+        id_column = infer_id_column(df, id_column)
+        df.index = df[id_column]
+
+        logging.info('Constructing rook graph.')
+        rook_graph = construct_graph_from_df(
+            df, adjacency_type='rook', geoid_col=id_column, cols_to_add=data_columns)
+
+        logging.info('Constructing queen graph.')
+        queen_graph = construct_graph_from_df(
+            df, adjacency_type='queen', geoid_col=id_column, cols_to_add=data_columns)
+
+        add_metadata(rook_graph, df, type='rook')
+        add_metadata(queen_graph, df, type='queen')
+
+        rook = Graph(rook_graph)
+        queen = Graph(queen_graph)
+
+        return cls(rook, queen)
+
+    # Should maybe move all the path configuration to a separate module?
+    @classmethod
+    def path(cls, fips, adjacency=None):
+        if adjacency not in ('rook', 'queen'):
+            raise ValueError(
+                'The parameter adjacency must be "rook", "queen", or None.')
+        return os.path.join(graphs_base_path, fips, adjacency + '.json')
 
     def save(self):
         logging.info('Saving graphs.')
 
         # Ensure that the paths exist:
-        state = self.rook.graph['state']
-        path = os.path.join(graphs_base_path, state)
-        pathlib.Path(path).mkdir(parents=True, exist_ok=True)
+        pathlib.Path(self.path()).mkdir(parents=True, exist_ok=True)
 
         # Save the graphs in their respective homes:
-        save(self.rook, filepath=os.path.join(path, 'rook.json'))
-        save(self.queen, filepath=os.path.join(path, 'queen.json'))
+        self.rook.save(filepath=self.path('rook'))
+        self.queen.save(filepath=self.path('queen'))

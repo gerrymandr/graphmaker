@@ -1,13 +1,9 @@
 import json
 import logging
 import os
-import pathlib
 
-import networkx
-import pandas
+from graphmaker.graph import RookAndQueenGraphs
 
-from add_columns import add_columns_and_report
-from build_graph import construct_rook_and_queen_graphs
 from constants import graphs_base_path
 from reports import report, rook_vs_queen
 
@@ -38,12 +34,11 @@ def main(args):
     if not path:
         raise ValueError('Please specify a shapefile to turn into a graph.')
 
-    rook, queen = construct_rook_and_queen_graphs(path, id_column=id_column)
-    save_graphs(rook, queen)
+    state_graphs = RookAndQueenGraphs.from_shapefile(path, id_column=id_column)
 
-    result = build_reports(rook, queen)
+    result = build_reports(state_graphs.rook, state_graphs.queen)
 
-    state = rook.graph['state']
+    state = state_graphs.fips
     with open(os.path.join(graphs_base_path, state, "report.json"), 'w') as f:
         f.write(json.dumps(result, indent=2, sort_keys=True))
     return result
