@@ -28,39 +28,6 @@ def build_reports(rook_graph, queen_graph):
             'comparison': comparison}
 
 
-def save_graphs(rook_graph, queen_graph):
-    logging.info('Saving graphs.')
-
-    # Ensure that the paths exist:
-    state = rook_graph.graph['state']
-    path = os.path.join(graphs_base_path, state)
-    pathlib.Path(path).mkdir(parents=True, exist_ok=True)
-
-    # Save the graphs in their respective homes:
-    save(rook_graph, filepath=os.path.join(path, 'rook.json'))
-    save(queen_graph, filepath=os.path.join(path, 'queen.json'))
-
-
-def save(graph, location=graphs_base_path, filepath=None):
-    if not filepath:
-        filepath = os.path.join(location, graph.graph['id'] + ".json")
-    data = networkx.readwrite.json_graph.adjacency_data(graph)
-    with open(filepath, 'w') as f:
-        json.dump(data, f)
-    print(f"Saved the graph to {filepath}")
-
-
-def add_columns_from_csv_to_graph(graph, csv_path, id_column, columns=None):
-    table = pandas.read_csv(csv_path)
-    add_columns_from_df_to_graph(graph, table, id_column, columns)
-
-
-def add_columns_from_df_to_graph(graph, table, id_column, columns=None):
-    if not columns:
-        columns = [column for column in table.columns if column != id_column]
-    return add_columns_and_report(graph, table, columns, id_column)
-
-
 def main(args):
     path = args[0]
 
@@ -80,13 +47,6 @@ def main(args):
     with open(os.path.join(graphs_base_path, state, "report.json"), 'w') as f:
         f.write(json.dumps(result, indent=2, sort_keys=True))
     return result
-
-
-def load_graph(path):
-    with open(path, 'r') as document:
-        data = json.load(document)
-    graph = networkx.readwrite.json_graph.adjacency_graph(data)
-    return graph
 
 
 if __name__ == '__main__':
