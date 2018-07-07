@@ -1,9 +1,11 @@
 import logging
 import os
+import pathlib
 
 import geopandas as gp
 import pandas
 
+from add_data import add_data_from_dataframe
 from constants import (block_population_path, fips_to_state_name,
                        valid_fips_codes)
 from match_vtds_to_districts import integrate_over_blocks_in_vtds
@@ -43,10 +45,10 @@ def get_vtd_data_from_blocks(fips, block_df, columns):
     return data
 
 
-def create_table_from_block_level_data(fips, output_path):
+def vtd_populations_from_blocks(fips):
     block_df = block_population_dataframe(fips)
     vtd_populations = get_vtd_data_from_blocks(fips, block_df, ['POP10'])
-    vtd_populations.to_csv(os.path.join(output_path), header=True)
+    return vtd_populations
 
 
 def population_csv_path(fips):
@@ -54,12 +56,20 @@ def population_csv_path(fips):
 
 
 def main():
+    pathlib.Path(block_population_path).mkdir(parents=True, exist_ok=True)
+
     for fips in valid_fips_codes():
-        if fips == '26':
-            state = fips_to_state_name[fips]
-            logging.info(
-                'Aggregating block-level population data for ' + state + '.')
-            create_table_from_block_level_data(fips, population_csv_path(fips))
+        state = fips_to_state_name[fips]
+
+        logging.info('Downloading block-level data for ' + state + '.')
+        download_blocks_for_state(fips)
+
+        logging.info(
+            'Aggregating block-level population data for ' + state + '.')
+
+        vtd_pops = vtd_populations_from_blocks(fips)
+
+        add_data_from_dataframe(fips, vtd_pops, ['POP10'], 'geoid')
 
 
 if __name__ == '__main__':
