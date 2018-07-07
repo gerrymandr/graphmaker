@@ -26,7 +26,9 @@ def summary(data):
 
 def zeros(data):
     zeros = [n for n in data if not n]
-    return {'number_of_zeros': len(zeros), 'percent_zero': len(zeros)/len(data)}
+    return {'number_of_rows': len(data),
+            'number_of_zeros': len(zeros),
+            'percent_zero': round((len(zeros)/len(data))*100, round_to)}
 
 
 def column_statistics(column):

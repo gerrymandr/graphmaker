@@ -11,7 +11,7 @@ from build_graph import construct_rook_and_queen_graphs
 from constants import graphs_base_path
 from reports import report, rook_vs_queen
 
-logging.basicConfig(level=logging.DEBUG)
+# logging.basicConfig(level=logging.DEBUG)
 
 
 def build_reports(rook_graph, queen_graph):
@@ -78,7 +78,7 @@ def main(args):
 
     state = rook.graph['state']
     with open(os.path.join(graphs_base_path, state, "report.json"), 'w') as f:
-        f.write(json.dumps(result, indent=2))
+        f.write(json.dumps(result, indent=2, sort_keys=True))
     return result
 
 

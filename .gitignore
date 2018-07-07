@@ -8,3 +8,5 @@ build/
 mongodata/
 block_assignments/
 cd_matchings/
+blocks/
+vtd_statistics/

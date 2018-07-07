@@ -6,17 +6,17 @@ from functools import partial
 import numpy
 import pandas
 
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-
 from constants import (cd_matchings_path, fips_to_state_abbreviation,
                        fips_to_state_name, graphs_base_path, valid_fips_codes)
 from main import load_graph
 
-logging.basicConfig(level=logging.INFO,
-                    handlers=[logging.StreamHandler(),
-                              logging.FileHandler('./matching.log')])
+# import matplotlib
+# matplotlib.use('Agg')
+# import matplotlib.pyplot as plt
+
+
+# logging.basicConfig(level=logging.INFO)
+
 
 # The VTDs have GEOIDs of this form:
 # {2-digit state FIPS}{3-digit county code}{>=2-digit VTD code}
@@ -43,14 +43,22 @@ def block_to_unit_filepath(fips, unit):
 
 
 def blocks_to_vtds_dataframe(fips, name_geoid_column='geoid'):
-    df = pandas.read_csv(block_to_unit_filepath(
-        fips, 'VTD'), index_col='BLOCKID', dtype=str)
+    df = pandas.read_csv(block_to_unit_filepath(fips, 'VTD'), dtype=str)
     df[name_geoid_column] = fips + df['COUNTYFP'] + df['DISTRICT']
     return df
 
 
 def integrate_over_blocks_in_vtds(fips, series, function=numpy.sum):
-    blocks = blocks_to_vtds_dataframe(fips)
+    """
+    Integrates the block-level values in :series: to produce vtd-level
+    aggregate values.
+
+    :fips: state fips code
+    :series: pandas Series, assumed to be indexed by Census block GEOID
+    :function: (defaults to sum) the function to use for aggregation
+    """
+    blocks = blocks_to_vtds_dataframe(fips, name_geoid_column='geoid')
+    blocks = blocks.set_index('BLOCKID')
     blocks['data'] = series
     grouped_by_vtd = blocks.groupby('geoid')
     vtd_totals = grouped_by_vtd['data'].aggregate(function)
@@ -71,13 +79,18 @@ def patch_value_from_neighbors(node, series, graph):
     return best_guess
 
 
-def choose_most_common(group, split_percentages=None):
-    counts = group.value_counts(dropna=False, normalize=True)
+def choose_most_common(group, dropna=False, split_percentages=None):
+    counts = group.value_counts(dropna=dropna, normalize=True)
     common = counts.index
-    most_common = common[0]
+
+    try:
+        most_common = common[0]
+    except KeyError:
+        choose_most_common(group, dropna=False,
+                           split_percentages=split_percentages)
 
     if len(common) > 1:
-        logging.warn(f"More than one CD assigned to these blocks!")
+        logging.warn(f"More than one CD assigned to the blocks in this VTD!")
         percentage = round((counts[0] / sum(counts)) * 100, 2)
         logging.warn(f"{percentage}% were assigned to {most_common}")
         split_percentages.append(percentage)
@@ -91,10 +104,13 @@ def graph_path(fips, adjacency='rook'):
 
 def match_vtds_to_districts(fips, split_percentages, district='CD'):
     logging.info(f"Loading blocks for fips code {fips}")
+
     blocks_to_cds = pandas.read_csv(
-        block_to_unit_filepath(fips, district), index_col='BLOCKID', dtype=str)
+        block_to_unit_filepath(fips, district), dtype=str)
+    blocks_to_cds = blocks_to_cds.set_index('BLOCKID')
 
     blocks_to_vtds = blocks_to_vtds_dataframe(fips)
+    blocks_to_vtds = blocks_to_vtds.set_index('BLOCKID')
     blocks_to_vtds[district] = blocks_to_cds['DISTRICT']
 
     logging.info(
@@ -112,7 +128,7 @@ def match_vtds_to_districts(fips, split_percentages, district='CD'):
     return vtds_to_cds
 
 
-def create_matching_for_state(fips, output_file):
+def create_matching_for_state(fips, output_file, split_rates):
     split_percentages = []
     vtds_to_cds = match_vtds_to_districts(fips, split_percentages)
 
@@ -122,20 +138,24 @@ def create_matching_for_state(fips, output_file):
         f"Remaining missing values: {number_missing}")
 
     percent_split = round((len(split_percentages) / len(vtds_to_cds))*100, 3)
-    plt.title(f"{percent_split}% of VTDs were split")
-    plt.hist(split_percentages, bins=100)
-    plt.savefig(os.path.join(cd_matchings_path, 'plots', fips + '.png'))
-    plt.close()
+    split_rates.append(percent_split)
+
+    # plt.title(f"{percent_split}% of VTDs were split")
+    # plt.hist(split_percentages, bins=100)
+    # plt.savefig(os.path.join(cd_matchings_path, 'plots', fips + '.png'))
+    # plt.close()
 
     logging.info(f"Writing output to {output_file}")
     vtds_to_cds.to_csv(output_file)
 
 
 def create_matchings_for_every_state():
+    split_rates = []
     for fips in valid_fips_codes():
         logging.info(f"Working on {fips_to_state_name[fips]}")
         create_matching_for_state(fips, os.path.join(
-            cd_matchings_path, fips + '.csv'))
+            cd_matchings_path, fips + '.csv'), split_rates)
+    print(pandas.DataFrame(split_rates).describe())
 
 
 def main():
