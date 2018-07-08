@@ -104,15 +104,15 @@ def map_units_to_parts_via_blocks(blocks, graph, unit='VTD', part='CD'):
     return units_to_parts
 
 
-def match(fips, unit, part):
+def match(fips, unit, part, part_name='DISTRICT'):
     log.info(f"Loading blocks for fips code {fips}")
 
     blocks_to_parts = BlockAssignmentFile(fips).as_df(unit=part)
     blocks_to_parts = blocks_to_parts.set_index('BLOCKID')
 
-    blocks_to_units = BlockAssignmentFile(fips).as_def(unit=unit)
+    blocks_to_units = BlockAssignmentFile(fips).as_df(unit=unit)
     blocks_to_units = blocks_to_units.set_index('BLOCKID')
-    blocks_to_units[part] = blocks_to_parts['DISTRICT']
+    blocks_to_units[part] = blocks_to_parts[part_name]
 
     log.info(
         'Matching each unit to the most common part assignment'

@@ -1,9 +1,9 @@
 round_to = 3
 
-graphs_base_path = './graphmaker/graphs/vtd-adjacency-graphs/vtd-adjacency-graphs/'
-tiger_data_path = './graphmaker/tiger_data/'
-block_population_path = './graphmaker/blocks/'
-block_assignment_path = '../block_assignments/block_assignments/'
+graphs_base_path = 'C:/dev/gerrydb/graphmaker/graphmaker/graphs/vtd-adjacency-graphs/vtd-adjacency-graphs/'
+tiger_data_path = 'C:/dev/gerrydb/graphmaker/graphmaker/tiger_data/'
+block_population_path = 'C:/dev/gerrydb/graphmaker/graphmaker/blocks/'
+block_assignment_path = 'C:/dev/gerrydb/block_assignments/block_assignments/'
 
 fips_to_state_abbreviation = {'01': 'AL', '02': 'AK', '04': 'AZ', '05': 'AR', '06': 'CA',
                               '08': 'CO', '09': 'CT', '10': 'DE', '11': 'DC', '12': 'FL',

@@ -42,11 +42,15 @@ class ZippedCensusResource:
 class CensusShapefileResource(ZippedCensusResource):
     base_url = ''
 
+    def file_stem(self):
+        raise NotImplementedError('CensusShapefileResources must specify their '
+                                  'file_stem.')
+
     def as_df(self):
         return gp.read_file(self.path())
 
     def path(self):
-        return os.path.join(self.target_folder(self.fips), self.file_stem() + '.shp')
+        return os.path.join(self.target_folder(), self.file_stem() + '.shp')
 
     def url(self):
         return self.base_url + self.file_stem() + '.zip'
@@ -59,6 +63,10 @@ class BlockPopulationShapefile(CensusShapefileResource):
     def file_stem(self):
         return 'tabblock2010_' + self.fips + '_pophu'
 
+    def as_df(self):
+        df = super().as_df()
+        return df.set_index('BLOCKID10')
+
 
 class VTDShapefile(CensusShapefileResource):
     base_path = tiger_data_path
@@ -69,7 +77,7 @@ class VTDShapefile(CensusShapefileResource):
 
     def path(self, year='2012'):
         shapefile_name = "tl_" + year + "_" + self.fips + "_vtd10.shp"
-        return os.path.join(self.target_folder(self.fips), shapefile_name)
+        return os.path.join(self.target_folder(), shapefile_name)
 
 
 class BlockAssignmentFile(ZippedCensusResource):
