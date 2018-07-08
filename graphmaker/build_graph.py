@@ -2,9 +2,7 @@ import datetime
 import logging
 import uuid
 
-import geopandas
-
-from .make_graph import construct_graph_from_df
+log = logging.getLogger(__name__)
 
 
 def find_column_with(columns, pattern):
@@ -17,17 +15,17 @@ def find_column_with(columns, pattern):
 
 def infer_id_column(dataframe, id_column=None):
     if id_column:
-        logging.info('The user specified the id_column.')
+        log.info('The user specified the id_column.')
         return id_column
 
     candidate = find_column_with(dataframe.columns, 'geoid')
     if candidate:
-        logging.info('Inferred the id_column by the presence of \'geoid\'.')
+        log.info('Inferred the id_column by the presence of \'geoid\'.')
         return candidate
 
     candidate = find_column_with(dataframe.columns, 'id')
     if candidate:
-        logging.warn('Inferred the id_column by the presence of \'id\'.')
+        log.warn('Inferred the id_column by the presence of \'id\'.')
         return candidate
     else:
         raise ValueError('No id_column was specified, and I was unable to find '
@@ -51,24 +49,3 @@ def add_metadata(graph, df, **other_fields):
     # add whatever other metadata the user wants to add
     for key, value in other_fields.items():
         graph.graph[key] = value
-
-
-def construct_rook_and_queen_graphs(shapefile, id_column=None, data_columns=None):
-    df = geopandas.read_file(shapefile)
-    df = df.to_crs({'init': 'epsg:4326'})
-
-    id_column = infer_id_column(df, id_column)
-    df.index = df[id_column]
-
-    logging.info('Constructing rook graph.')
-    rook_graph = construct_graph_from_df(
-        df, geoid_col=id_column, cols_to_add=data_columns, queen=False)
-
-    logging.info('Constructing queen graph.')
-    queen_graph = construct_graph_from_df(
-        df, geoid_col=id_column, cols_to_add=data_columns, queen=True)
-
-    add_metadata(rook_graph, df, type='rook')
-    add_metadata(queen_graph, df, type='queen')
-
-    return rook_graph, queen_graph

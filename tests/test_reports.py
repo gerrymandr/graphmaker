@@ -3,10 +3,12 @@ from unittest.mock import Mock
 
 import networkx
 import numpy
-from graphmaker.reports import (edge_set, eigenvalues_hist, graph_statistics,
-                                number_connected_components, report,
-                                rook_vs_queen, serializable_histogram,
-                                unit_contained_in_another)
+from graphmaker.reports.graph_report import (edge_set, eigenvalues_hist,
+                                             graph_report, graph_statistics,
+                                             number_connected_components,
+                                             rook_vs_queen,
+                                             serializable_histogram,
+                                             unit_contained_in_another)
 
 
 def test_edge_set_is_insensitive_to_order_of_nodes():
@@ -95,7 +97,7 @@ def test_report_calls_every_function():
     for mock in mock_reports:
         mock.return_value = dict()
 
-    report(mock_graph, mock_reports)
+    graph_report(mock_graph, mock_reports)
     assert all(mock.call_count == 1 for mock in mock_reports)
 
 
