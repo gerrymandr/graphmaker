@@ -2,7 +2,6 @@ round_to = 3
 
 graphs_base_path = './graphmaker/graphs/vtd-adjacency-graphs/vtd-adjacency-graphs/'
 tiger_data_path = './graphmaker/tiger_data/'
-cd_matchings_path = './graphmaker/cd_matchings/'
 block_population_path = './graphmaker/blocks/'
 block_assignment_path = '../block_assignments/block_assignments/'
 

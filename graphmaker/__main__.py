@@ -3,11 +3,10 @@ import logging
 import os
 
 import pandas
-from graphmaker.constants import (cd_matchings_path, fips_to_state_name,
-                                  graphs_base_path, valid_fips_codes)
+from graphmaker.constants import (fips_to_state_name, graphs_base_path,
+                                  valid_fips_codes)
 from graphmaker.graph import RookAndQueenGraphs
-from graphmaker.match import (create_matchings_for_every_state,
-                              integrate_over_blocks_in_vtds)
+from graphmaker.match import integrate_over_blocks_in_vtds, match
 from graphmaker.reports.column import column_report
 from graphmaker.reports.graph_report import graph_report, rook_vs_queen
 from graphmaker.resources import BlockPopulationShapefile, VTDShapefile
@@ -63,14 +62,10 @@ def add_basic_data_from_census_shapefiles():
         graphs.save()
 
 
-def add_cds_to_graphs():
+def create_matchings_for_every_state():
     for fips in valid_fips_codes():
-        log.info(f"Opening graphs for {fips}")
-        graphs = RookAndQueenGraphs.load_fips(fips)
-        cds = pandas.read_csv(os.path.join(cd_matchings_path, fips + '.csv'),
-                              dtype=str, header=None, names=['geoid', 'CD'])
-        graphs.add_columns_from_df(cds, ['CD'], 'geoid')
-        # graphs.save()
+        log.info(f"Working on {fips_to_state_name[fips]}")
+        match(fips, 'VTD', 'CD')
 
 
 def build_reports(graphs):

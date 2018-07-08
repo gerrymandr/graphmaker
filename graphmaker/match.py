@@ -5,7 +5,6 @@ import numpy
 import pandas
 
 from .collect import collector
-from .constants import fips_to_state_name, valid_fips_codes
 from .graph import RookAndQueenGraphs
 from .resources import BlockAssignmentFile
 
@@ -170,14 +169,8 @@ def check_for_missing_values(fips, matching):
                   "assignments.", extra={'fips': fips, 'number_missing': number_missing})
 
 
-def create_matchings_for_every_state():
-    for fips in valid_fips_codes():
-        log.info(f"Working on {fips_to_state_name[fips]}")
-        match(fips, 'VTD', 'CD')
-
-
 def main():
-    create_matchings_for_every_state()
+    pass
 
 
 if __name__ == '__main__':
