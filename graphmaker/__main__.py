@@ -6,7 +6,8 @@ import pandas
 from graphmaker.constants import (fips_to_state_name, graphs_base_path,
                                   valid_fips_codes)
 from graphmaker.graph import RookAndQueenGraphs
-from graphmaker.match import integrate_over_blocks_in_vtds, match
+from graphmaker.integrate import integrate_over_blocks_in_units
+from graphmaker.match import match
 from graphmaker.reports.column import column_report
 from graphmaker.reports.graph_report import graph_report, rook_vs_queen
 from graphmaker.resources import BlockPopulationShapefile, VTDShapefile
@@ -18,16 +19,18 @@ log.setLevel(logging.DEBUG)
 
 def get_vtd_data_from_blocks(fips, block_df, columns):
     # Block population files have block ids under 'BLOCKID10'
-    block_df = block_df.set_index('BLOCKID10')
 
-    data = pandas.DataFrame({column: integrate_over_blocks_in_vtds(
-        fips, block_df[column]) for column in columns})
+    data = pandas.DataFrame({column: integrate_over_blocks_in_units(
+        fips, block_df[column], unit='VTD') for column in columns})
     return data
 
 
 def vtd_populations_from_blocks(fips):
     block_df = BlockPopulationShapefile(fips).as_df()
+    block_df = block_df.set_index('BLOCKID10')
+
     vtd_populations = get_vtd_data_from_blocks(fips, block_df, ['POP10'])
+
     return vtd_populations
 
 # These functions will add data to every state's graph:

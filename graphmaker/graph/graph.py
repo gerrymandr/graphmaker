@@ -1,3 +1,4 @@
+import datetime
 import json
 import logging
 import os
@@ -8,18 +9,10 @@ import networkx
 import pandas
 
 from ..constants import graphs_base_path
-from .build_graph import add_metadata, infer_id_column
+from ..utils import find_column_with, generate_id, infer_id_column
 from .make_graph import construct_graph_from_df
 
 log = logging.getLogger(__name__)
-
-
-def map_ids_to_column_entries(table, id_column, data_column):
-    return dict(zip(table[id_column], table[data_column]))
-
-
-def add_column_to_graph(graph, column, attribute_name):
-    networkx.set_node_attributes(graph, column, attribute_name)
 
 
 class Graph:
@@ -127,3 +120,26 @@ class RookAndQueenGraphs:
         # Save the graphs in their respective homes:
         self.rook.save(filepath=self.path('rook'))
         self.queen.save(filepath=self.path('queen'))
+
+
+def add_metadata(graph, df, **other_fields):
+    state_col = find_column_with(df.columns, 'state')
+    if state_col:
+        graph.graph['state'] = df[state_col][0]
+    else:
+        # Rhode island's special shapefiles are the only ones without
+        graph.graph['state'] = '44'
+    graph.graph['id'] = generate_id()
+    graph.graph['created'] = str(datetime.datetime.utcnow())
+
+    # add whatever other metadata the user wants to add
+    for key, value in other_fields.items():
+        graph.graph[key] = value
+
+
+def map_ids_to_column_entries(table, id_column, data_column):
+    return dict(zip(table[id_column], table[data_column]))
+
+
+def add_column_to_graph(graph, column, attribute_name):
+    networkx.set_node_attributes(graph, column, attribute_name)

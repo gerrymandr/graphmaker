@@ -1,7 +1,6 @@
 import logging
 from collections import Counter
 
-import numpy
 import pandas
 
 from .collect import collector
@@ -34,23 +33,6 @@ collect = collector('vtd_splits',
 # The block assignment files are named like:
 # "BlockAssign_ST{fips}_{2-digit state abbreviation}_{matched unit}
 # For example, BlockAssign_ST26_MI_CD assigns blocks to CDs in Michigan.
-
-
-def integrate_over_blocks_in_vtds(fips, series, unit, function=numpy.sum):
-    """
-    Integrates the block-level values in :series: to produce vtd-level
-    aggregate values.
-
-    :fips: state fips code
-    :series: pandas Series, assumed to be indexed by Census block GEOID
-    :function: (defaults to sum) the function to use for aggregation
-    """
-    blocks = BlockAssignmentFile(fips).as_df(unit)
-    blocks = blocks.set_index('BLOCKID')
-    blocks['data'] = series
-    grouped_by_vtd = blocks.groupby(unit)
-    vtd_totals = grouped_by_vtd['data'].aggregate(function)
-    return vtd_totals
 
 
 def patch_value_from_neighbors(node, series, graph):
