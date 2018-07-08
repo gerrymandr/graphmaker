@@ -88,4 +88,7 @@ class BlockAssignmentFile(ZippedCensusResource):
                             f"BlockAssign_ST{fips}_{abbrev}_{unit}.txt")
 
     def as_df(self, unit='VTD'):
-        return pandas.read_csv(self.path(unit), dtype=str)
+        df = pandas.read_csv(self.path(unit), dtype=str)
+        if unit == 'VTD':
+            df['VTD'] = self.fips + df['COUNTYFP'] + df['DISTRICT']
+        return df

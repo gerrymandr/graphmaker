@@ -1,12 +1,11 @@
 import logging
-import os
 from collections import Counter
 
 import numpy
 import pandas
 
 from .collect import collector
-from .constants import cd_matchings_path, fips_to_state_name, valid_fips_codes
+from .constants import fips_to_state_name, valid_fips_codes
 from .graph import RookAndQueenGraphs
 from .resources import BlockAssignmentFile
 
@@ -38,13 +37,7 @@ collect = collector('vtd_splits',
 # For example, BlockAssign_ST26_MI_CD assigns blocks to CDs in Michigan.
 
 
-def blocks_to_vtds_dataframe(fips, name_geoid_column='geoid'):
-    df = BlockAssignmentFile(fips).as_df()
-    df[name_geoid_column] = fips + df['COUNTYFP'] + df['DISTRICT']
-    return df
-
-
-def integrate_over_blocks_in_vtds(fips, series, function=numpy.sum):
+def integrate_over_blocks_in_vtds(fips, series, unit, function=numpy.sum):
     """
     Integrates the block-level values in :series: to produce vtd-level
     aggregate values.
@@ -53,10 +46,10 @@ def integrate_over_blocks_in_vtds(fips, series, function=numpy.sum):
     :series: pandas Series, assumed to be indexed by Census block GEOID
     :function: (defaults to sum) the function to use for aggregation
     """
-    blocks = blocks_to_vtds_dataframe(fips, name_geoid_column='geoid')
+    blocks = BlockAssignmentFile(fips).as_df(unit)
     blocks = blocks.set_index('BLOCKID')
     blocks['data'] = series
-    grouped_by_vtd = blocks.groupby('geoid')
+    grouped_by_vtd = blocks.groupby(unit)
     vtd_totals = grouped_by_vtd['data'].aggregate(function)
     return vtd_totals
 
@@ -106,7 +99,7 @@ def keys_with_na_values(mapping):
             yield key
 
 
-def map_units_to_parts_via_blocks(blocks, graph, unit='geoid', part='CD'):
+def map_units_to_parts_via_blocks(blocks, graph, unit='VTD', part='CD'):
     """
     :blocks: dataframe of blocks with columns for :unit: and :part: assignments
     :graph: networkx adjacency graph with units as nodes
@@ -130,55 +123,57 @@ def map_units_to_parts_via_blocks(blocks, graph, unit='geoid', part='CD'):
     return units_to_parts
 
 
-def match_vtds_to_districts(fips, graph, district='CD'):
+def match(fips, unit, part):
     log.info(f"Loading blocks for fips code {fips}")
 
-    blocks_to_cds = BlockAssignmentFile(fips).as_df(unit=district)
-    blocks_to_cds = blocks_to_cds.set_index('BLOCKID')
+    blocks_to_parts = BlockAssignmentFile(fips).as_df(unit=part)
+    blocks_to_parts = blocks_to_parts.set_index('BLOCKID')
 
-    blocks_to_vtds = blocks_to_vtds_dataframe(fips)
-    blocks_to_vtds = blocks_to_vtds.set_index('BLOCKID')
-    blocks_to_vtds[district] = blocks_to_cds['DISTRICT']
+    blocks_to_units = BlockAssignmentFile(fips).as_def(unit=unit)
+    blocks_to_units = blocks_to_units.set_index('BLOCKID')
+    blocks_to_units[part] = blocks_to_parts['DISTRICT']
 
     log.info(
-        'Matching each VTD to the most common district assignment'
-        'of the blocks in the VTD.')
+        'Matching each unit to the most common part assignment'
+        'of the blocks in the unit.')
 
-    vtds_to_cds = map_units_to_parts_via_blocks(
-        blocks_to_vtds, graph.graph, unit='geoid', part='CD')
-    return vtds_to_cds
-
-
-def create_matching_for_state(fips, adajacency, output_file):
     graphs = RookAndQueenGraphs.load_fips(fips)
-    graph = graphs.by_adjacency(adajacency)
 
-    vtds_to_cds = match_vtds_to_districts(fips, graph)
+    for adjacency in ('rook', 'queen'):
+        graph = graphs.by_adjacency(adjacency)
+        log.info(
+            'Matching each unit to the most common part assignment'
+            'of the blocks in the unit.')
 
-    log.info('Created a matching of VTDs to CDs.')
+        units_to_parts = map_units_to_parts_via_blocks(
+            blocks_to_units, graph.graph, unit, part)
 
-    number_missing = len(tuple(keys_with_na_values(vtds_to_cds)))
-    log.info(
-        f"Remaining missing values: {number_missing}",
-        extra={'number_missing': number_missing})
+        log.info(
+            f"Created a matching of {unit}s to {part}s for the {adjacency}-adjacency graph.")
 
-    # percent_split = round((len(split_percentages) / len(vtds_to_cds))*100, 3)
-    # split_rates.append(percent_split)
+        check_for_missing_values(fips, units_to_parts)
 
-    # plt.title(f"{percent_split}% of VTDs were split")
-    # plt.hist(split_percentages, bins=100)
-    # plt.savefig(os.path.join(cd_matchings_path, 'plots', fips + '.png'))
-    # plt.close()
+        graph.add_columns_from_df(units_to_parts, [part], unit)
 
+    graphs.save()
+
+
+def save(matching, output_file):
     log.info(f"Writing output to {output_file}")
-    # vtds_to_cds.to_csv(output_file)
+    matching.to_csv(output_file)
+
+
+def check_for_missing_values(fips, matching):
+    number_missing = len(tuple(keys_with_na_values(matching)))
+    if number_missing > 0:
+        log.error(f"Something went wrong. {fips} has {number_missing} missing"
+                  "assignments.", extra={'fips': fips, 'number_missing': number_missing})
 
 
 def create_matchings_for_every_state():
     for fips in valid_fips_codes():
         log.info(f"Working on {fips_to_state_name[fips]}")
-        create_matching_for_state(fips, 'queen', os.path.join(
-            cd_matchings_path, fips + '.csv'))
+        match(fips, 'VTD', 'CD')
 
 
 def main():

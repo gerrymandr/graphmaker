@@ -2,7 +2,7 @@ from unittest.mock import MagicMock, patch
 
 import networkx
 import pandas
-from graphmaker.match_vtds_to_districts import map_units_to_parts_via_blocks
+from graphmaker.match import map_units_to_parts_via_blocks
 
 
 def imperfect_matching():
@@ -39,7 +39,7 @@ def test_match_unit_to_most_common_part_if_match_not_perfect():
     assert matching['1'] == 1 and matching['2'] == 2
 
 
-@patch('graphmaker.match_vtds_to_districts.collect')
+@patch('graphmaker.match.collect')
 def test_match_collects_splits(mock_collect):
     blocks = imperfect_matching()
     graph = MagicMock()

@@ -6,8 +6,8 @@ import pandas
 from graphmaker.constants import (cd_matchings_path, fips_to_state_name,
                                   graphs_base_path, valid_fips_codes)
 from graphmaker.graph import RookAndQueenGraphs
-from graphmaker.match_vtds_to_districts import (create_matchings_for_every_state,
-                                                integrate_over_blocks_in_vtds)
+from graphmaker.match import (create_matchings_for_every_state,
+                              integrate_over_blocks_in_vtds)
 from graphmaker.reports.column import column_report
 from graphmaker.reports.graph_report import graph_report, rook_vs_queen
 from graphmaker.resources import BlockPopulationShapefile, VTDShapefile

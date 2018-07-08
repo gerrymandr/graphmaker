@@ -20,6 +20,9 @@ def collector(name, fields, filepath, append=False, format_types=None, delimiter
         CSV. Any fields not included will default to 'f'.
     :delimiter: the delimiter in the CSV. Defaults to '|' to avoid collisions.
     """
+    if not format_types:
+        format_types = dict()
+
     if 'asctime' not in fields:
         fields = ['asctime'] + fields
 
