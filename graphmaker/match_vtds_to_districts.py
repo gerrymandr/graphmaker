@@ -1,11 +1,11 @@
 import logging
 import os
 from collections import Counter
-from functools import partial
 
 import numpy
 import pandas
 
+from .collect import collector
 from .constants import cd_matchings_path, fips_to_state_name, valid_fips_codes
 from .graph import RookAndQueenGraphs
 from .resources import BlockAssignmentFile
@@ -14,11 +14,16 @@ from .resources import BlockAssignmentFile
 # matplotlib.use('Agg')
 # import matplotlib.pyplot as plt
 
+log = logging.getLogger(__name__)
+log.setLevel(logging.DEBUG)
+log.addHandler(logging.StreamHandler())
 
-# logging.basicConfig(level=logging.INFO)
+collect = collector('vtd_splits',
+                    ['fips', 'node', 'best_guess_match',
+                     'percent_match'], './logs/vtd_splits.csv',
+                    {'percent_match': '.4f'})
 
-
-# The VTDs have GEOIDs of this form:
+# VTDs have GEOIDs of this form:
 # {2-digit state FIPS}{3-digit county code}{>=2-digit VTD code}
 
 # We can match VTDs to CDs like this:
@@ -31,9 +36,6 @@ from .resources import BlockAssignmentFile
 # The block assignment files are named like:
 # "BlockAssign_ST{fips}_{2-digit state abbreviation}_{matched unit}
 # For example, BlockAssign_ST26_MI_CD assigns blocks to CDs in Michigan.
-
-
-# Our objective will be to make a VTD-to-CD assignment CSV.
 
 
 def blocks_to_vtds_dataframe(fips, name_geoid_column='geoid'):
@@ -67,33 +69,69 @@ def patch_value_from_neighbors(node, series, graph):
     degree = graph.degree[node]
     percent = round((count/degree) * 100, 2)
 
-    logging.info(f"{percent}% of {node}'s neighbors have value {best_guess},"
-                 f" so our best-guess value for {node} is {best_guess}.")
+    log.info(f"{percent}% of {node}'s neighbors have value {best_guess},"
+             f" so our best-guess value for {node} is {best_guess}.")
 
     return best_guess
 
 
-def choose_most_common(group, dropna=False, split_percentages=None):
-    counts = group.value_counts(dropna=dropna, normalize=True)
-    common = counts.index
+def most_common_values(series):
+    counts = series.value_counts(dropna=True)
+    if len(counts.index) == 0:
+        counts = series.value_counts(dropna=False)
+    return counts
 
-    try:
+
+def check_for_splits(value_counts, graph, unit, part):
+    fips = graph.graph.get('state', '')
+
+    for node, counts in value_counts.items():
+        common = counts.index
         most_common = common[0]
-    except KeyError:
-        choose_most_common(group, dropna=False,
-                           split_percentages=split_percentages)
 
-    if len(common) > 1:
-        logging.warn(f"More than one CD assigned to the blocks in this VTD!")
-        percentage = round((counts[0] / sum(counts)) * 100, 2)
-        logging.warn(f"{percentage}% were assigned to {most_common}")
-        split_percentages.append(percentage)
+        if len(common) > 1:
+            log.warn(
+                f"More than one {part} assigned to the blocks in {unit} {node}!")
+            percentage = counts[most_common] / sum(counts)
+            log.warn(
+                f"{round(percentage*100, 2)}% were assigned to {part} {most_common}")
+            # the first two digits of a block_id is the state fips code
+            collect(fips=fips, node=node, best_guess_match=most_common,
+                    percent_match=percentage)
 
-    return most_common
+
+def keys_with_na_values(mapping):
+    for key, value in mapping.items():
+        if pandas.isna(value):
+            yield key
 
 
-def match_vtds_to_districts(fips, split_percentages, district='CD'):
-    logging.info(f"Loading blocks for fips code {fips}")
+def map_units_to_parts_via_blocks(blocks, graph, unit='geoid', part='CD'):
+    """
+    :blocks: dataframe of blocks with columns for :unit: and :part: assignments
+    :graph: networkx adjacency graph with units as nodes
+    """
+    grouped_by_unit = blocks.groupby(unit)
+
+    value_counts = {node: group[part].agg(most_common_values)
+                    for node, group in grouped_by_unit}
+
+    check_for_splits(value_counts, graph, unit, part)
+
+    units_to_parts = {node: counts.idxmax()
+                      for node, counts in value_counts.items()}
+
+    # For values that are still NA, use the graph structure
+    # to infer a reasonable choice
+    for node in keys_with_na_values(units_to_parts):
+        units_to_parts[node] = patch_value_from_neighbors(
+            node, units_to_parts, graph)
+
+    return units_to_parts
+
+
+def match_vtds_to_districts(fips, graph, district='CD'):
+    log.info(f"Loading blocks for fips code {fips}")
 
     blocks_to_cds = BlockAssignmentFile(fips).as_df(unit=district)
     blocks_to_cds = blocks_to_cds.set_index('BLOCKID')
@@ -102,50 +140,45 @@ def match_vtds_to_districts(fips, split_percentages, district='CD'):
     blocks_to_vtds = blocks_to_vtds.set_index('BLOCKID')
     blocks_to_vtds[district] = blocks_to_cds['DISTRICT']
 
-    logging.info(
-        'Matching each VTD to the most common district assignment of the blocks in the VTD.')
+    log.info(
+        'Matching each VTD to the most common district assignment'
+        'of the blocks in the VTD.')
 
-    grouped_by_vtd = blocks_to_vtds.groupby('geoid')
-    vtds_to_cds = grouped_by_vtd[district].aggregate(
-        partial(choose_most_common, split_percentages=split_percentages))
-
-    graph = RookAndQueenGraphs.load_fips(fips).rook.graph
-
-    for node in vtds_to_cds[vtds_to_cds.isna()].index:
-        vtds_to_cds[node] = patch_value_from_neighbors(
-            node, vtds_to_cds, graph)
-
+    vtds_to_cds = map_units_to_parts_via_blocks(
+        blocks_to_vtds, graph.graph, unit='geoid', part='CD')
     return vtds_to_cds
 
 
-def create_matching_for_state(fips, output_file, split_rates):
-    split_percentages = []
-    vtds_to_cds = match_vtds_to_districts(fips, split_percentages)
+def create_matching_for_state(fips, adajacency, output_file):
+    graphs = RookAndQueenGraphs.load_fips(fips)
+    graph = graphs.by_adjacency(adajacency)
 
-    logging.info('I created a matching of VTDs to CDs.')
-    number_missing = len(vtds_to_cds[vtds_to_cds.isna()])
-    logging.info(
-        f"Remaining missing values: {number_missing}")
+    vtds_to_cds = match_vtds_to_districts(fips, graph)
 
-    percent_split = round((len(split_percentages) / len(vtds_to_cds))*100, 3)
-    split_rates.append(percent_split)
+    log.info('Created a matching of VTDs to CDs.')
+
+    number_missing = len(tuple(keys_with_na_values(vtds_to_cds)))
+    log.info(
+        f"Remaining missing values: {number_missing}",
+        extra={'number_missing': number_missing})
+
+    # percent_split = round((len(split_percentages) / len(vtds_to_cds))*100, 3)
+    # split_rates.append(percent_split)
 
     # plt.title(f"{percent_split}% of VTDs were split")
     # plt.hist(split_percentages, bins=100)
     # plt.savefig(os.path.join(cd_matchings_path, 'plots', fips + '.png'))
     # plt.close()
 
-    logging.info(f"Writing output to {output_file}")
-    vtds_to_cds.to_csv(output_file)
+    log.info(f"Writing output to {output_file}")
+    # vtds_to_cds.to_csv(output_file)
 
 
 def create_matchings_for_every_state():
-    split_rates = []
     for fips in valid_fips_codes():
-        logging.info(f"Working on {fips_to_state_name[fips]}")
-        create_matching_for_state(fips, os.path.join(
-            cd_matchings_path, fips + '.csv'), split_rates)
-    print(pandas.DataFrame(split_rates).describe())
+        log.info(f"Working on {fips_to_state_name[fips]}")
+        create_matching_for_state(fips, 'queen', os.path.join(
+            cd_matchings_path, fips + '.csv'))
 
 
 def main():

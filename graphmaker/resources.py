@@ -5,11 +5,10 @@ import pathlib
 import geopandas as gp
 import pandas
 
-from constants import block_assignment_path, fips_to_state_abbreviation
-
-from ..constants import (block_population_path, tiger_data_path,
-                         valid_fips_codes)
-from ..utils import download_and_unzip
+from .constants import (block_assignment_path, block_population_path,
+                        fips_to_state_abbreviation, tiger_data_path,
+                        valid_fips_codes)
+from .utils import download_and_unzip
 
 log = logging.getLogger(__name__)
 

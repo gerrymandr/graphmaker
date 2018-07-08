@@ -7,9 +7,11 @@ import geopandas
 import networkx
 import pandas
 
+from ..constants import graphs_base_path
 from .build_graph import add_metadata, infer_id_column
-from .constants import graphs_base_path
 from .make_graph import construct_graph_from_df
+
+log = logging.getLogger(__name__)
 
 
 def map_ids_to_column_entries(table, id_column, data_column):
@@ -35,7 +37,7 @@ class Graph:
         data = networkx.readwrite.json_graph.adjacency_data(self.graph)
         with open(filepath, 'w') as f:
             json.dump(data, f)
-        logging.info(f"Saved the graph to {filepath}")
+        log.info(f"Saved the graph to {filepath}")
 
     def add_columns_from_csv(self, csv_path, columns=None, id_column=None):
         table = pandas.read_csv(csv_path)
@@ -67,7 +69,7 @@ class RookAndQueenGraphs:
 
     @classmethod
     def from_shapefile(cls, shapefile, data_columns=None,  id_column=None):
-        logging.info(
+        log.info(
             'Constructing adjacency graphs from shapefile ' + str(shapefile))
         df = geopandas.read_file(shapefile)
         df = df.to_crs({'init': 'epsg:4326'})
@@ -75,11 +77,11 @@ class RookAndQueenGraphs:
         id_column = infer_id_column(df, id_column)
         df.index = df[id_column]
 
-        logging.info('Constructing rook graph.')
+        log.info('Constructing rook graph.')
         rook_graph = construct_graph_from_df(
             df, adjacency_type='rook', geoid_col=id_column, cols_to_add=data_columns)
 
-        logging.info('Constructing queen graph.')
+        log.info('Constructing queen graph.')
         queen_graph = construct_graph_from_df(
             df, adjacency_type='queen', geoid_col=id_column, cols_to_add=data_columns)
 
@@ -96,7 +98,7 @@ class RookAndQueenGraphs:
     def path(cls, fips, adjacency=None):
         if adjacency not in ('rook', 'queen'):
             raise ValueError(
-                'The parameter adjacency must be "rook", "queen", or None.')
+                'The parameter adjacency must be "rook" or "queen".')
         return os.path.join(graphs_base_path, fips, adjacency + '.json')
 
     def add_columns_from_df(self, df, columns=None, id_column=None):
@@ -107,8 +109,17 @@ class RookAndQueenGraphs:
         df = geopandas.read_file(shapefile_path)
         self.add_data_from_dataframe(self, df, columns, id_column)
 
+    def by_adjacency(self, adjacency):
+        if adjacency == 'rook':
+            return self.rook
+        elif adjacency == 'queen':
+            return self.queen
+        else:
+            raise ValueError(
+                'The parameter adjacency must be "rook" or "queen".')
+
     def save(self):
-        logging.info('Saving graphs.')
+        log.info('Saving graphs.')
 
         # Ensure that the paths exist:
         pathlib.Path(self.path()).mkdir(parents=True, exist_ok=True)
