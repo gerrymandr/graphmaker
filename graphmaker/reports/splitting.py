@@ -1,6 +1,5 @@
 import numpy
 from graphmaker.constants import fips_to_state_name
-from graphmaker.reports.graph_report import serializable_histogram
 from graphmaker.resources import BlockAssignmentFile, BlockPopulationShapefile
 
 
@@ -11,18 +10,15 @@ def splitting_report(fips, unit, part):
     information_distance = float(entropy(matrix))
 
     splitting_confidence_vector = splitting_confidence(
-        matrix, indices).flat.tolist()
+        matrix).flatten().tolist()
     unit_indices = {u: i for (u, p), (i, j) in indices.items()}
     confidences = {
         u: splitting_confidence_vector[i] for u, i in unit_indices.items()}
 
-    hist = serializable_histogram(splitting_confidence_vector)
-
     return {'fips': fips, 'state': fips_to_state_name[fips],
             'unit': unit, 'partitioned_by': part,
             'information_distance': information_distance,
-            'splitting_confidences': confidences,
-            'splitting_confidence_histogram': hist}
+            'splitting_confidences': confidences}
 
 
 def load_matching_dataframe(fips, unit, part, part_name='DISTRICT'):
@@ -49,7 +45,6 @@ def splitting_matrix(df, unit, part, weight_column):
     matrix = numpy.zeros((len(units), len(parts)))
 
     grouped = df.groupby([unit, part])
-    print(grouped.groups)
 
     for label, group in grouped:
         matrix[indices[label]] = numpy.sum(group[weight_column].values)
@@ -65,6 +60,8 @@ def entropy(matrix):
         return matrix[i, j] / total
 
     def prob_j_given_i(i, j):
+        if unit_totals[i] == 0:
+            return 0
         return matrix[i, j] / unit_totals[i]
 
     def ijth_term(i, j):
@@ -83,4 +80,7 @@ def splitting_confidence(matrix):
     the maximum over all j of the probability of being in part j, given
     that you are in unit i. (The maximum over j of prob_j_given_i).
     """
-    return numpy.amax(matrix, axis=1) / numpy.sum(matrix, axis=1)
+    vector = (numpy.amax(matrix, axis=1) / numpy.sum(matrix, axis=1)).flatten()
+    vector[vector == numpy.inf] = 0
+    vector = numpy.nan_to_num(vector)
+    return vector

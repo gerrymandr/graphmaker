@@ -2,7 +2,7 @@ import numpy
 import pandas
 import pytest
 from graphmaker.reports.splitting import (entropy, load_matching_dataframe,
-                                          splitting_matrix)
+                                          splitting_matrix, splitting_report)
 
 
 # Replace these dataframes with mocks
@@ -51,3 +51,9 @@ def test_shape_of_matrix_has_columns_for_parts_and_rows_for_units():
 def test_entropy_is_zero_when_unit_determines_part():
     matrix = numpy.eye(8)
     assert entropy(matrix) == 0
+
+
+@pytest.mark.skip('Need to re-write with mocks - it takes too long.')
+def test_splitting_report():
+    report = splitting_report('26', 'VTD', 'CD')
+    assert report
