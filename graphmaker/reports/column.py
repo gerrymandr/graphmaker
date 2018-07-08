@@ -2,8 +2,8 @@ import datetime
 import numbers
 import statistics
 
-from constants import round_to
-from reports import serializable_histogram
+from ..constants import round_to
+from .graph_report import serializable_histogram
 
 
 def summary(data):
