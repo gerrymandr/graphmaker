@@ -1,9 +1,25 @@
+import os
+
 round_to = 3
 
-graphs_base_path = 'C:/dev/gerrydb/graphmaker/graphmaker/graphs/vtd-adjacency-graphs/vtd-adjacency-graphs/'
-tiger_data_path = 'C:/dev/gerrydb/graphmaker/graphmaker/tiger_data/'
-block_population_path = 'C:/dev/gerrydb/graphmaker/graphmaker/blocks/'
-block_assignment_path = 'C:/dev/gerrydb/block_assignments/block_assignments/'
+os.environ['DEV'] = 'True'
+
+if 'GERRY_DATA' in os.environ:
+    GERRY_DATA = os.environ['GERRY_DATA']
+elif 'VRDI_DATA' in os.environ:
+    GERRY_DATA = os.environ['VRDI_DATA']
+
+if 'DEV' in os.environ:
+    graphs_base_path = 'C:/dev/gerrydb/graphmaker/graphmaker/graphs/' \
+        'vtd-adjacency-graphs/vtd-adjacency-graphs/'
+    tiger_data_path = 'C:/dev/gerrydb/graphmaker/graphmaker/tiger_data/'
+    block_population_path = 'C:/dev/gerrydb/graphmaker/graphmaker/blocks/'
+    block_assignment_path = 'C:/dev/gerrydb/block_assignments/block_assignments/'
+else:
+    graphs_base_path = os.path.join(GERRY_DATA, 'graphs')
+    tiger_data_path = os.path.join(GERRY_DATA, 'tiger_data')
+    block_population_path = os.path.join(GERRY_DATA, 'blocks')
+    block_assignment_path = os.path.join(GERRY_DATA, 'block_assignments')
 
 fips_to_state_abbreviation = {'01': 'AL', '02': 'AK', '04': 'AZ', '05': 'AR', '06': 'CA',
                               '08': 'CO', '09': 'CT', '10': 'DE', '11': 'DC', '12': 'FL',
@@ -16,6 +32,9 @@ fips_to_state_abbreviation = {'01': 'AL', '02': 'AK', '04': 'AZ', '05': 'AR', '0
                               '45': 'SC', '46': 'SD', '47': 'TN', '48': 'TX', '49': 'UT',
                               '50': 'VT', '51': 'VA', '53': 'WA', '54': 'WV', '55': 'WI',
                               '56': 'WY'}
+
+state_abbrevation_to_fips = {value: key for key,
+                             value in fips_to_state_abbreviation.items()}
 
 fips_to_state_name = {'01': 'Alabama', '02': 'Alaska', '04': 'Arizona', '05': 'Arkansas',
                       '06': 'California', '08': 'Colorado', '09': 'Connecticut', '10': 'Delaware',
@@ -31,6 +50,8 @@ fips_to_state_name = {'01': 'Alabama', '02': 'Alaska', '04': 'Arizona', '05': 'A
                       '46': 'South Dakota', '47': 'Tennessee', '48': 'Texas', '49': 'Utah',
                       '50': 'Vermont', '51': 'Virginia', '53': 'Washington', '54': 'West Virginia',
                       '55': 'Wisconsin', '56': 'Wyoming'}
+
+state_name_to_fips = {value: key for key, value in fips_to_state_name.items()}
 
 
 def generate_constants():

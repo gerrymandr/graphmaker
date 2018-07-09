@@ -1,4 +1,5 @@
 import logging
+import pathlib
 
 
 def collector(name, fields, filepath, append=False, format_types=None, delimiter='|'):
@@ -27,6 +28,8 @@ def collector(name, fields, filepath, append=False, format_types=None, delimiter
         fields = ['asctime'] + fields
 
     logger = logging.Logger(name)
+
+    pathlib.Path(filepath).parent.mkdir(parents=True, exist_ok=True)
 
     if not append:
         with open(filepath, 'w') as f:

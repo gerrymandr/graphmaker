@@ -7,10 +7,6 @@ from .collect import collector
 from .graph import RookAndQueenGraphs
 from .resources import BlockAssignmentFile
 
-# import matplotlib
-# matplotlib.use('Agg')
-# import matplotlib.pyplot as plt
-
 log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
 log.addHandler(logging.StreamHandler())
@@ -104,7 +100,38 @@ def map_units_to_parts_via_blocks(blocks, graph, unit='VTD', part='CD'):
     return units_to_parts
 
 
-def match(fips, unit, part, part_name='DISTRICT'):
+def match(graph, unit, part, part_name='DISTRICT'):
+    adjacency_graph = graph.graph
+    fips = adjacency_graph.graph['state']
+
+    blocks_to_parts = BlockAssignmentFile(fips, download=True).as_df(unit=part)
+    blocks_to_parts = blocks_to_parts.set_index('BLOCKID')
+
+    blocks_to_units = BlockAssignmentFile(fips, download=True).as_df(unit=unit)
+    blocks_to_units = blocks_to_units.set_index('BLOCKID')
+    blocks_to_units[part] = blocks_to_parts[part_name]
+
+    log.info(
+        'Matching each unit to the most common part assignment '
+        'of the blocks in the unit.')
+
+    units_to_parts = map_units_to_parts_via_blocks(
+        blocks_to_units, adjacency_graph, unit, part)
+
+    log.info(
+        f"Created a matching of {unit}s to {part}s for the adjacency graph.")
+
+    check_for_missing_values(fips, units_to_parts)
+
+    log.info(f"Adding assignment column {part} to the graph")
+
+    units_to_parts_df = pandas.DataFrame(
+        list(units_to_parts.items()), columns=[unit, part])
+
+    graph.add_columns_from_df(units_to_parts_df, [part], unit)
+
+
+def match_fips(fips, unit, part, part_name='DISTRICT'):
     log.info(f"Loading blocks for fips code {fips}")
 
     blocks_to_parts = BlockAssignmentFile(fips).as_df(unit=part)
@@ -113,10 +140,6 @@ def match(fips, unit, part, part_name='DISTRICT'):
     blocks_to_units = BlockAssignmentFile(fips).as_df(unit=unit)
     blocks_to_units = blocks_to_units.set_index('BLOCKID')
     blocks_to_units[part] = blocks_to_parts[part_name]
-
-    log.info(
-        'Matching each unit to the most common part assignment'
-        'of the blocks in the unit.')
 
     graphs = RookAndQueenGraphs.load_fips(fips)
 
@@ -149,11 +172,3 @@ def check_for_missing_values(fips, matching):
     if number_missing > 0:
         log.error(f"Something went wrong. {fips} has {number_missing} missing"
                   "assignments.", extra={'fips': fips, 'number_missing': number_missing})
-
-
-def main():
-    pass
-
-
-if __name__ == '__main__':
-    main()

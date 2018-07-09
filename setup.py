@@ -8,6 +8,7 @@ setuptools.setup(
     author_email='max.hully@gmail.com',
 
     packages=setuptools.find_packages(),
+    include_package_data=True,
 
     url='https://github.com/gerrymandr/graphmaker',
     license='LICENSE',
@@ -15,5 +16,18 @@ setuptools.setup(
     description='',
     long_description='',
 
-    install_requires=[],
+    install_requires=[
+        'Click',
+        'geopandas',
+        'pandas',
+        'pysal',
+        'networkx',
+        'numpy',
+        'requests',
+        'utm'
+    ],
+    # entry_points='''
+    #     [console_scripts]
+    #     gerry=graphmaker.cli:cli
+    # ''',
 )

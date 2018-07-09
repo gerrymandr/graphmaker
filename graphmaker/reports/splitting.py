@@ -53,19 +53,16 @@ def splitting_matrix(df, unit, part, weight_column):
     return matrix, indices
 
 
-def splitting_energy(matrix, function='log'):
+def splitting_energy(matrix, function=numpy.log):
     """
-
+    Computes the conditional entropy splitting energy for the given
+    :matrix:, whose ij-th entry is expected to be the intersection
+    (in terms of population, area, or whatever the user wants)
+    of unit i with part j.
+    Uses :function: in place of `log` (default is`numpy.log`).
     """
     total = numpy.sum(matrix)
     unit_totals = numpy.sum(matrix, axis=1)
-
-    functions_for_splitting_energy = {
-        'log': numpy.log,
-        'sqrt': numpy.sqrt
-    }
-
-    f = functions_for_splitting_energy[function]
 
     def prob_i_and_j(i, j):
         return matrix[i, j] / total
@@ -79,7 +76,7 @@ def splitting_energy(matrix, function='log'):
         inside = prob_j_given_i(i, j)
         if inside == 0:
             return 0
-        return prob_i_and_j(i, j) * f(inside)
+        return prob_i_and_j(i, j) * function(inside)
 
     return - numpy.sum(ijth_term(i, j) for (i, j) in numpy.ndindex(*matrix.shape))
 

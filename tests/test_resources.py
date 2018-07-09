@@ -33,3 +33,17 @@ def test_they_all_implement_target_folder():
 
     resource = BlockAssignmentFile('26')
     assert resource.target_folder()
+
+
+def test_the_specific_resources_have_urls():
+    resource = VTDShapefile('12')
+    assert resource.url()
+
+    resource = BlockAssignmentFile('12')
+    assert resource.url()
+
+
+def test_zipped_census_resource_raises_when_url_not_implemented():
+    resource = ZippedCensusResource('12')
+    with pytest.raises(NotImplementedError):
+        resource.url()

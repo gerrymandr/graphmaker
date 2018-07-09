@@ -5,7 +5,18 @@ import zipfile
 
 import requests
 
+from graphmaker.constants import state_name_to_fips, state_abbrevation_to_fips
+
 log = logging.getLogger(__name__)
+
+
+def resolve_fips(state):
+    if state.capitalize() in state_name_to_fips:
+        return state_name_to_fips[state.lower()]
+    elif state.upper() in state_abbrevation_to_fips:
+        return state_abbrevation_to_fips[state.upper()]
+    else:
+        return state
 
 
 def download_and_unzip(url, target):

@@ -1,13 +1,9 @@
-FROM python:3.6.5
+FROM continuumio/miniconda3
 
-RUN pip install pipenv
-
-COPY ./Pipfile ./Pipfile.lock /code/
+COPY . /code
 
 WORKDIR /code
 
-RUN pipenv install
-
-COPY ./graphmaker .
+RUN python setup.py install
 
 ENTRYPOINT [ "bash" ]
