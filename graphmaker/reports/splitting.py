@@ -3,11 +3,12 @@ from graphmaker.constants import fips_to_state_name
 from graphmaker.resources import BlockAssignmentFile, BlockPopulationShapefile
 
 
-def splitting_report(fips, unit, part):
+def splitting_report(fips, unit, part, function_for_entropy='log'):
     df = load_matching_dataframe(fips, unit, part)
     matrix, indices = splitting_matrix(df, unit, part, 'population')
 
-    information_distance = float(entropy(matrix))
+    information_distance = float(
+        entropy(matrix, function=function_for_entropy))
 
     splitting_confidence_vector = splitting_confidence(
         matrix).flatten().tolist()
@@ -52,9 +53,19 @@ def splitting_matrix(df, unit, part, weight_column):
     return matrix, indices
 
 
-def entropy(matrix):
+def entropy(matrix, function='log'):
+    """
+
+    """
     total = numpy.sum(matrix)
     unit_totals = numpy.sum(matrix, axis=1)
+
+    functions_for_entropy = {
+        'log': numpy.log,
+        'sqrt': numpy.sqrt
+    }
+
+    f = functions_for_entropy[function]
 
     def prob_i_and_j(i, j):
         return matrix[i, j] / total
@@ -65,10 +76,10 @@ def entropy(matrix):
         return matrix[i, j] / unit_totals[i]
 
     def ijth_term(i, j):
-        inside_log = prob_j_given_i(i, j)
-        if inside_log == 0:
+        inside = prob_j_given_i(i, j)
+        if inside == 0:
             return 0
-        return prob_i_and_j(i, j) * numpy.log(inside_log)
+        return prob_i_and_j(i, j) * f(inside)
 
     return - numpy.sum(ijth_term(i, j) for (i, j) in numpy.ndindex(*matrix.shape))
 
