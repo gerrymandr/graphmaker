@@ -8,20 +8,61 @@ import pandas
 from .constants import (block_assignment_path, block_population_path,
                         fips_to_state_abbreviation, tiger_data_path,
                         valid_fips_codes)
-from .utils import download_and_unzip
+from .utils import download_and_unzip, resolve_fips
 
 log = logging.getLogger(__name__)
+
+
+class Resource:
+    def __init__(self, url):
+        self.url = url
+
+    def download(self, target=None):
+        if not target:
+            raise ValueError(
+                'Please specific a target folder for your download.')
+        download_and_unzip(self.url, target)
+
+
+class ResourceType:
+    def __init__(self, tiger, url, res_type):
+        self.tiger = tiger
+        self.url = url
+        self.res_type = res_type
+
+    def _get(self, fips_or_state):
+        fips = resolve_fips(fips_or_state)
+        return Resource(url=f"{self.url}tl_{self.tiger.year}_{fips}_{self.res_type.lower()}.zip")
+
+    def __getattr__(self, *args, **kwargs):
+        return self._get(*args, **kwargs)
+
+    def __getitem__(self, *args, **kwargs):
+        return self._get(*args, **kwargs)
+
+
+class Tiger:
+    def __init__(self, year):
+        self.year = year
+        self.url = f"https://www2.census.gov/geo/tiger/TIGER{year}/"
+
+    def __getattr__(self, res):
+        return ResourceType(tiger=self, url=f"{self.url}{res.upper()}/", res_type=res)
 
 
 class ZippedCensusResource:
     base_path = ''
 
-    def __init__(self, fips):
+    def __init__(self, fips, download=False):
         self.fips = fips
+        if download and not os.path.exists(self.path()):
+            self.download()
 
-    def download(self, *args, **kwargs):
-        download_and_unzip(self.url(*args, **kwargs),
-                           self.target_folder(*args, **kwargs))
+    def download(self, target=None, *args, **kwargs):
+        if target:
+            self._target = target
+            target = self.target_folder(*args, **kwargs)
+        download_and_unzip(self.url(*args, **kwargs), target)
 
     def target_folder(self):
         return os.path.join(self.base_path, self.fips)
@@ -83,8 +124,20 @@ class VTDShapefile(CensusShapefileResource):
         return os.path.join(self.target_folder(), shapefile_name)
 
 
+class CensusTractShapefile(CensusShapefileResource):
+    base_path = tiger_data_path
+
+    def url(self, year='2012'):
+        base = "https://www2.census.gov/geo/tiger/TIGER"
+        return base + year + "/VTD/tl_" + year + "_" + self.fips + "_tract10.zip"
+
+    def path(self, year='2012'):
+        shapefile_name = "tl_" + year + "_" + self.fips + "_tract10.shp"
+        return os.path.join(self.target_folder(), shapefile_name)
+
+
 class BlockAssignmentFile(ZippedCensusResource):
-    base_path = block_assignment_path
+    _base_path = block_assignment_path
 
     def url(self):
         abbrev = fips_to_state_abbreviation[self.fips]
