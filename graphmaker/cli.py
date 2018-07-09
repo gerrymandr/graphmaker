@@ -19,3 +19,6 @@ def match(state, unit, part):
         fips = state
 
     _match(fips, unit, part)
+
+
+cli.add_command(match)

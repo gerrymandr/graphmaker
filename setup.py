@@ -20,9 +20,11 @@ setuptools.setup(
         'Click',
         'geopandas',
         'pandas',
+        'pysal',
         'networkx',
         'numpy',
-        'requests'
+        'requests',
+        'utm'
     ],
     entry_points='''
         [console_scripts]
