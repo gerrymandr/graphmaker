@@ -1,10 +1,20 @@
+import os
+
 round_to = 3
 
-graphs_base_path = 'C:/dev/gerrydb/graphmaker/graphmaker/graphs/' \
-    'vtd-adjacency-graphs/vtd-adjacency-graphs/'
-tiger_data_path = 'C:/dev/gerrydb/graphmaker/graphmaker/tiger_data/'
-block_population_path = 'C:/dev/gerrydb/graphmaker/graphmaker/blocks/'
-block_assignment_path = 'C:/dev/gerrydb/block_assignments/block_assignments/'
+GERRY_DATA = os.environ['GERRY_DATA'] or os.environ['VRDI_DATA']
+
+if os.environ['DEVELOPMENT']:
+    graphs_base_path = 'C:/dev/gerrydb/graphmaker/graphmaker/graphs/' \
+        'vtd-adjacency-graphs/vtd-adjacency-graphs/'
+    tiger_data_path = 'C:/dev/gerrydb/graphmaker/graphmaker/tiger_data/'
+    block_population_path = 'C:/dev/gerrydb/graphmaker/graphmaker/blocks/'
+    block_assignment_path = 'C:/dev/gerrydb/block_assignments/block_assignments/'
+else:
+    graphs_base_path = os.path.join(GERRY_DATA, 'graphs')
+    tiger_data_path = os.path.join(GERRY_DATA, 'tiger_data')
+    block_population_path = os.path.join(GERRY_DATA, 'blocks')
+    block_assignment_path = os.path.join(GERRY_DATA, 'block_assignments')
 
 fips_to_state_abbreviation = {'01': 'AL', '02': 'AK', '04': 'AZ', '05': 'AR', '06': 'CA',
                               '08': 'CO', '09': 'CT', '10': 'DE', '11': 'DC', '12': 'FL',
