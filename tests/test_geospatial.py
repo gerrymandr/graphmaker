@@ -4,7 +4,7 @@ from shapely.geometry import Point
 
 
 def example_point():
-    return Point(42.3, -83.7)
+    return Point(-83.7, 42.3)
 
 
 def test_identify_utm_zone():

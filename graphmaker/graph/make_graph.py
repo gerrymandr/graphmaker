@@ -4,10 +4,9 @@ import geopandas as gp
 import networkx
 import pandas as pd
 import pysal as ps
+from graphmaker.geospatial import reprojected
 from networkx.readwrite import json_graph
 from shapely.ops import cascaded_union
-
-from geospatial import reprojected
 
 
 def get_list_of_data(filepath, col_name, geoid=None):
@@ -61,13 +60,15 @@ def add_data_to_graph(df, graph, col_names, id_col=None):
                 graph.nodes[i][name] = data
 
 
-def construct_graph_from_df(df, geoid_col=None, cols_to_add=None, queen=False):
+def construct_graph_from_df(df,  adjacency_type, geoid_col=None, cols_to_add=None):
     """Construct initial graph from information about neighboring VTDs.
 
     :df: Geopandas dataframe.
     :returns: NetworkX Graph.
-
     """
+    if adjacency_type not in ('rook', 'queen'):
+        raise ValueError('adjacency_type must be rook or queen.')
+
     # reproject to a UTM projection for accurate areas and perimeters in meters
     df = reprojected(df)
 
@@ -75,7 +76,7 @@ def construct_graph_from_df(df, geoid_col=None, cols_to_add=None, queen=False):
         df = df.set_index(geoid_col)
 
     # Generate rook or queen neighbor lists from dataframe.
-    if queen:
+    if adjacency_type == 'queen':
         neighbors = ps.weights.Queen.from_dataframe(
             df, geom_col="geometry").neighbors
     else:
@@ -85,7 +86,6 @@ def construct_graph_from_df(df, geoid_col=None, cols_to_add=None, queen=False):
     vtds = {}
 
     for shape in neighbors:
-
         vtds[shape] = {}
 
         for neighbor in neighbors[shape]:
@@ -127,7 +127,7 @@ def construct_graph_from_json(jsonData):
     return json_graph.adjacency_graph(jsonData)
 
 
-def construct_graph_from_file(filename, geoid_col=None, cols_to_add=None):
+def construct_graph_from_file(filename, adjacency_type=None, geoid_col=None, cols_to_add=None):
     """Constucts initial graph from either json(networkx adjacency_graph format) file
     or from a shapefile
 
@@ -146,11 +146,13 @@ def construct_graph_from_file(filename, geoid_col=None, cols_to_add=None):
         return graph
     elif filename.split('.')[-1] == "shp":
         df = gp.read_file(filename)
-        graph = construct_graph_from_df(df, geoid_col, cols_to_add)
+        graph = construct_graph_from_df(
+            df, adjacency_type, geoid_col, cols_to_add)
         return graph
 
 
-def construct_graph(data_source, geoid_col=None, data_cols=None, data_source_type="filename"):
+def construct_graph(data_source, adjacency_type=None, geoid_col=None,
+                    data_cols=None, data_source_type="filename"):
     """Constructs initial graph using the graph constructor that best
     matches the data_source and dataType formats
 
@@ -161,13 +163,13 @@ def construct_graph(data_source, geoid_col=None, data_cols=None, data_source_typ
     :returns: netwrokx graph
     """
     if data_source_type == "filename":
-        return construct_graph_from_file(data_source, geoid_col, data_cols)
+        return construct_graph_from_file(data_source, adjacency_type, geoid_col, data_cols)
 
     elif data_source_type == "json":
         return construct_graph_from_json(data_source)
 
     elif data_source_type == "geo_data_frame":
-        return construct_graph_from_df(data_source, geoid_col, data_cols)
+        return construct_graph_from_df(data_source, adjacency_type, geoid_col, data_cols)
 
 
 def get_assignment_dict(df, key_col, val_col):

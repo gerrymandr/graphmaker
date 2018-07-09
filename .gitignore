@@ -10,3 +10,6 @@ block_assignments/
 cd_matchings/
 blocks/
 vtd_statistics/
+dist/
+graphmaker.egg-info/
+logs/

@@ -1,15 +1,19 @@
-from distutils.core import setup
+import setuptools
 
-setup(
+setuptools.setup(
     name='graphmaker',
     version='0.1.0',
+
     author='Max Hully',
     author_email='max.hully@gmail.com',
-    packages=['graphmaker'],
-    scripts=[],
+
+    packages=setuptools.find_packages(),
+
     url='https://github.com/gerrymandr/graphmaker',
-    license='LICENSE.txt',
+    license='LICENSE',
+
     description='',
     long_description='',
+
     install_requires=[],
 )
