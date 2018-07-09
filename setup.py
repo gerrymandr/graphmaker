@@ -26,8 +26,8 @@ setuptools.setup(
         'requests',
         'utm'
     ],
-    entry_points='''
-        [console_scripts]
-        gerry=graphmaker.cli:cli
-    ''',
+    # entry_points='''
+    #     [console_scripts]
+    #     gerry=graphmaker.cli:cli
+    # ''',
 )
