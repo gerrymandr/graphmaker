@@ -4,7 +4,7 @@ round_to = 3
 
 GERRY_DATA = os.environ['GERRY_DATA'] or os.environ['VRDI_DATA']
 
-if os.environ['DEVELOPMENT']:
+if 'DEV' in os.environ:
     graphs_base_path = 'C:/dev/gerrydb/graphmaker/graphmaker/graphs/' \
         'vtd-adjacency-graphs/vtd-adjacency-graphs/'
     tiger_data_path = 'C:/dev/gerrydb/graphmaker/graphmaker/tiger_data/'
