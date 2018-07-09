@@ -3,12 +3,12 @@ from graphmaker.constants import fips_to_state_name
 from graphmaker.resources import BlockAssignmentFile, BlockPopulationShapefile
 
 
-def splitting_report(fips, unit, part, function_for_entropy='log'):
+def splitting_report(fips, unit, part, function_for_splitting_energy='log'):
     df = load_matching_dataframe(fips, unit, part)
     matrix, indices = splitting_matrix(df, unit, part, 'population')
 
     information_distance = float(
-        entropy(matrix, function=function_for_entropy))
+        splitting_energy(matrix, function=function_for_splitting_energy))
 
     splitting_confidence_vector = splitting_confidence(
         matrix).flatten().tolist()
@@ -18,7 +18,7 @@ def splitting_report(fips, unit, part, function_for_entropy='log'):
 
     return {'fips': fips, 'state': fips_to_state_name[fips],
             'unit': unit, 'partitioned_by': part,
-            'information_distance': information_distance,
+            'splitting_energy': information_distance,
             'splitting_confidences': confidences}
 
 
@@ -53,19 +53,19 @@ def splitting_matrix(df, unit, part, weight_column):
     return matrix, indices
 
 
-def entropy(matrix, function='log'):
+def splitting_energy(matrix, function='log'):
     """
 
     """
     total = numpy.sum(matrix)
     unit_totals = numpy.sum(matrix, axis=1)
 
-    functions_for_entropy = {
+    functions_for_splitting_energy = {
         'log': numpy.log,
         'sqrt': numpy.sqrt
     }
 
-    f = functions_for_entropy[function]
+    f = functions_for_splitting_energy[function]
 
     def prob_i_and_j(i, j):
         return matrix[i, j] / total

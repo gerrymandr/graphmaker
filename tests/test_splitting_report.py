@@ -1,7 +1,7 @@
 import numpy
 import pandas
 import pytest
-from graphmaker.reports.splitting import (entropy, load_matching_dataframe,
+from graphmaker.reports.splitting import (splitting_energy, load_matching_dataframe,
                                           splitting_matrix, splitting_report)
 
 
@@ -48,9 +48,9 @@ def test_shape_of_matrix_has_columns_for_parts_and_rows_for_units():
     assert matrix.shape == (3, 2)
 
 
-def test_entropy_is_zero_when_unit_determines_part():
+def test_splitting_energy_is_zero_when_unit_determines_part():
     matrix = numpy.eye(8)
-    assert entropy(matrix) == 0
+    assert splitting_energy(matrix) == 0
 
 
 @pytest.mark.skip('Need to re-write with mocks - it takes too long.')
