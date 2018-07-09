@@ -7,10 +7,6 @@ from .collect import collector
 from .graph import RookAndQueenGraphs
 from .resources import BlockAssignmentFile
 
-# import matplotlib
-# matplotlib.use('Agg')
-# import matplotlib.pyplot as plt
-
 log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
 log.addHandler(logging.StreamHandler())
@@ -149,11 +145,3 @@ def check_for_missing_values(fips, matching):
     if number_missing > 0:
         log.error(f"Something went wrong. {fips} has {number_missing} missing"
                   "assignments.", extra={'fips': fips, 'number_missing': number_missing})
-
-
-def main():
-    pass
-
-
-if __name__ == '__main__':
-    main()

@@ -1,7 +1,6 @@
 import json
 import logging
 import os
-
 import pandas
 from graphmaker.constants import (fips_to_state_name, graphs_base_path,
                                   valid_fips_codes)
