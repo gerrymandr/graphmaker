@@ -17,7 +17,7 @@ def chloropleth(fips, column, filepath='./output.png'):
         column_name = 'column'
         df['column'] = column
 
-    _, ax = matplotlib.subplots(1)
+    _, ax = plt.subplots(1)
     df.plot(ax=ax, linewidth=0.5, edgecolor='0.5', column=column_name)
     ax.set_axis_off()
 
