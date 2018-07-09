@@ -1,6 +1,6 @@
 import click
-from constants import state_abbrevation_to_fips
-from match import match as _match
+from graphmaker.constants import state_abbrevation_to_fips
+from graphmaker.match import match as _match
 
 
 @click.group()
