@@ -2,7 +2,12 @@ import os
 
 round_to = 3
 
-GERRY_DATA = os.environ['GERRY_DATA'] or os.environ['VRDI_DATA']
+os.environ['DEV'] = 'True'
+
+if 'GERRY_DATA' in os.environ:
+    GERRY_DATA = os.environ['GERRY_DATA']
+elif 'VRDI_DATA' in os.environ:
+    GERRY_DATA = os.environ['VRDI_DATA']
 
 if 'DEV' in os.environ:
     graphs_base_path = 'C:/dev/gerrydb/graphmaker/graphmaker/graphs/' \

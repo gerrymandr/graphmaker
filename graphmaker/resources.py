@@ -26,6 +26,9 @@ class ZippedCensusResource:
     def target_folder(self):
         return os.path.join(self.base_path, self.fips)
 
+    def url(self):
+        raise NotImplementedError('ZippedCensusResources must implement url')
+
     @classmethod
     def download_all(cls, iterable=valid_fips_codes(), **kwargs):
         pathlib.Path(cls.base_path).mkdir(parents=True, exist_ok=True)
@@ -71,9 +74,9 @@ class BlockPopulationShapefile(CensusShapefileResource):
 class VTDShapefile(CensusShapefileResource):
     base_path = tiger_data_path
 
-    def url(fips, year='2012'):
+    def url(self, year='2012'):
         base = "https://www2.census.gov/geo/tiger/TIGER"
-        return base + year + "/VTD/tl_" + year + "_" + fips + "_vtd10.zip"
+        return base + year + "/VTD/tl_" + year + "_" + self.fips + "_vtd10.zip"
 
     def path(self, year='2012'):
         shapefile_name = "tl_" + year + "_" + self.fips + "_vtd10.shp"
