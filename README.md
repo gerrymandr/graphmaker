@@ -104,8 +104,7 @@ We'll use Florida as an example this time.
 ```python
 from graphmaker.graph import Graph
 
-my_state = Graph.load(
-    '../graphs/12/queen.json')
+my_state = Graph.load('../graphs/12/queen.json')
 ```
 
 ```python
