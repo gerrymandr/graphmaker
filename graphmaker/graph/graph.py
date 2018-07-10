@@ -118,7 +118,7 @@ class RookAndQueenGraphs:
 
     def add_columns_from_shapefile(self, shapefile_path, columns=None, id_column=None):
         df = geopandas.read_file(shapefile_path)
-        self.add_data_from_df(self, df, columns, id_column)
+        self.add_data_from_df(df, columns, id_column)
 
     def by_adjacency(self, adjacency):
         if adjacency == 'rook':
