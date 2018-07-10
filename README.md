@@ -73,7 +73,7 @@ kentucky_queen = Graph.load('./kentucky/queen.json')
 Then you can add columns from a shapefile:
 
 ```python
-kentucky_queen.add_columns_from_shapefile('./kentucky/tl_2012_21_tract.json',
+kentucky_queen.add_columns_from_shapefile('./kentucky/tl_2012_21_tract.shp',
                                           columns=['ALAND', 'AWATER', 'COUNTYFP', 'STATEFP'])
 ```
 
