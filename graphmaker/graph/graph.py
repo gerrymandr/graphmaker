@@ -41,7 +41,7 @@ class Graph:
 
     def add_columns_from_shapefile(self, shapefile, columns=None, id_column=None):
         df = geopandas.read_file(shapefile)
-        return self.add_columns_from_df(self, df, columns, id_column)
+        return self.add_columns_from_df(df, columns, id_column)
 
     def add_columns_from_df(self, table, columns=None, id_column=None):
         if not id_column:
