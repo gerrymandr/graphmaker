@@ -60,29 +60,7 @@ def add_data_to_graph(df, graph, col_names, id_col=None):
                 graph.nodes[i][name] = data
 
 
-def construct_graph_from_df(df,  adjacency_type, geoid_col=None, cols_to_add=None):
-    """Construct initial graph from information about neighboring VTDs.
-
-    :df: Geopandas dataframe.
-    :returns: NetworkX Graph.
-    """
-    if adjacency_type not in ('rook', 'queen'):
-        raise ValueError('adjacency_type must be rook or queen.')
-
-    # reproject to a UTM projection for accurate areas and perimeters in meters
-    df = reprojected(df)
-
-    if geoid_col is not None:
-        df = df.set_index(geoid_col)
-
-    # Generate rook or queen neighbor lists from dataframe.
-    if adjacency_type == 'queen':
-        neighbors = ps.weights.Queen.from_dataframe(
-            df, geom_col="geometry").neighbors
-    else:
-        neighbors = ps.weights.Rook.from_dataframe(
-            df, geom_col="geometry").neighbors
-
+def neighbors_with_shared_perimeters(neighbors, df):
     vtds = {}
 
     for shape in neighbors:
@@ -93,11 +71,13 @@ def construct_graph_from_df(df,  adjacency_type, geoid_col=None, cols_to_add=Non
                 df.loc[neighbor, "geometry"]).length
             vtds[shape][neighbor] = {'shared_perim': shared_perim}
 
-    graph = networkx.from_dict_of_dicts(vtds)
-    vtd = df['geometry']
+    return vtds
 
+
+def add_boundary_perimeters(graph, neighbors, df):
+    all_units = df['geometry']
     # creates one shape of the entire state to compare outer boundaries against
-    inter = gp.GeoSeries(cascaded_union(vtd).boundary)
+    inter = gp.GeoSeries(cascaded_union(all_units).boundary)
 
     # finds if it intersects on outside and sets
     # a 'boundary_node' attribute to true if it does
@@ -109,12 +89,64 @@ def construct_graph_from_df(df,  adjacency_type, geoid_col=None, cols_to_add=Non
         if inter.intersects(df.loc[node, "geometry"]).bool():
             graph.node[node]['boundary_perim'] = float(
                 inter.intersection(df.loc[node, "geometry"]).length)
+    return graph
 
+
+def add_areas(graph, df):
+    df = reprojected(df)
+    for node in graph.nodes:
+        graph.nodes[node]['area'] = df.loc[node, "geometry"].area
+    return graph
+
+
+def add_centroids(graph, df):
+    for node in graph.nodes:
+        graph.nodes[node]['centroid'] = df.loc[node, "geometry"].centroid
+
+
+def get_neighbors(df, adjacency_type):
+    if adjacency_type == 'queen':
+        return ps.weights.Queen.from_dataframe(
+            df, geom_col="geometry").neighbors
+    elif adjacency_type == 'rook':
+        return ps.weights.Rook.from_dataframe(
+            df, geom_col="geometry").neighbors
+    else:
+        raise ValueError('adjacency_type must be rook or queen.')
+
+
+def add_columns(graph, cols_to_add, df):
     if cols_to_add is not None:
         data = pd.DataFrame({x: df[x] for x in cols_to_add})
         if geoid_col is not None:
             data[geoid_col] = df.index
         add_data_to_graph(data, graph, cols_to_add, geoid_col)
+
+
+def construct_graph_from_df(df,  adjacency_type, geoid_col=None, cols_to_add=None):
+    """Construct initial graph from information about neighboring VTDs.
+
+    :df: Geopandas dataframe.
+    :returns: NetworkX Graph.
+    """
+    # reproject to a UTM projection for accurate areas and perimeters in meters
+    df = reprojected(df)
+
+    if geoid_col is not None:
+        df = df.set_index(geoid_col)
+
+    # Generate rook or queen neighbor lists from dataframe.
+    neighbors = get_neighbors(df, adjacency_type)
+
+    vtds = neighbors_with_shared_perimeters(neighbors, df)
+    graph = networkx.from_dict_of_dicts(vtds)
+
+    add_boundary_perimeters(graph, neighbors, df)
+
+    add_areas(graph, df)
+
+    add_columns(graph, cols_to_add, df)
+
     return graph
 
 

@@ -8,6 +8,7 @@ def utm_of_point(point):
 
 
 def identify_utm_zone(df):
+    df = df.to_crs("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
     utms = map(utm_of_point, df['geometry'].centroid)
     utm_counts = Counter(utms)
     # most_common returns a list of tuples, and we want the 0,0th entry
