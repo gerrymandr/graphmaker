@@ -115,12 +115,12 @@ def get_neighbors(df, adjacency_type):
         raise ValueError('adjacency_type must be rook or queen.')
 
 
-def add_columns(graph, cols_to_add, df):
+def add_columns(graph, cols_to_add, df, geoid_col):
     if cols_to_add is not None:
         data = pd.DataFrame({x: df[x] for x in cols_to_add})
         if geoid_col is not None:
             data[geoid_col] = df.index
-        add_data_to_graph(data, graph, cols_to_add, geoid_col)
+        add_data_to_graph(data, graph, cols_to_add, id_col=geoid_col)
 
 
 def construct_graph_from_df(df,  adjacency_type, geoid_col=None, cols_to_add=None):
@@ -145,7 +145,7 @@ def construct_graph_from_df(df,  adjacency_type, geoid_col=None, cols_to_add=Non
 
     add_areas(graph, df)
 
-    add_columns(graph, cols_to_add, df)
+    add_columns(graph, cols_to_add, df, geoid_col)
 
     return graph
 

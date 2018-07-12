@@ -66,7 +66,6 @@ class Graph:
         df = df.to_crs({'init': 'epsg:4326'})
 
         id_column = infer_id_column(df, id_column)
-        df.index = df[id_column]
 
         log.info('Constructing graph.')
         graph = construct_graph_from_df(df, adjacency_type=adjacency_type,
