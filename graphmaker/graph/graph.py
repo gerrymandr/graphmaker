@@ -59,7 +59,8 @@ class Graph:
     def from_shapefile(cls, shapefile, adjacency_type, data_columns=None, id_column=None):
         log.info('Constructing adjacency graph from shapefile ' + str(shapefile))
         df = geopandas.read_file(shapefile)
-        return cls.from_df(df, adjacency_type, data_columns, id_column)
+        return cls.from_df(df, adjacency_type=adjacency_type,
+                           data_columns=data_columns, id_column=id_column)
 
     @classmethod
     def from_df(cls, df, adjacency_type, data_columns=None, id_column=None):
