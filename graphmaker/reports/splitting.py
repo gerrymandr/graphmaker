@@ -3,8 +3,12 @@ from graphmaker.constants import fips_to_state_name
 from graphmaker.resources import BlockAssignmentFile, BlockPopulationShapefile
 
 
-def splitting_report(fips, unit, part, function_for_splitting_energy='log'):
+def splitting_report_for_fips(fips, unit, part, function_for_splitting_energy=numpy.log):
     df = load_matching_dataframe(fips, unit, part)
+    return splitting_report(df, unit, part, function_for_splitting_energy)
+
+
+def splitting_report(df, unit, part, function_for_splitting_energy=numpy.log):
     matrix, indices = splitting_matrix(df, unit, part, 'population')
 
     information_distance = float(
@@ -16,8 +20,7 @@ def splitting_report(fips, unit, part, function_for_splitting_energy='log'):
     confidences = {
         u: splitting_confidence_vector[i] for u, i in unit_indices.items()}
 
-    return {'fips': fips, 'state': fips_to_state_name[fips],
-            'unit': unit, 'partitioned_by': part,
+    return {'unit': unit, 'partitioned_by': part,
             'splitting_energy': information_distance,
             'splitting_confidences': confidences}
 

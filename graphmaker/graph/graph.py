@@ -30,9 +30,10 @@ class Graph:
         if not filepath:
             filepath = self.path
 
-        data = networkx.readwrite.json_graph.adjacency_data(self.graph)
+        data = json.dumps(
+            networkx.readwrite.json_graph.adjacency_data(self.graph))
         with open(filepath, 'w') as f:
-            json.dump(data, f)
+            f.write(data)
         log.info(f"Saved the graph to {filepath}")
 
     def add_columns_from_csv(self, csv_path, columns=None, id_column=None):
@@ -65,7 +66,6 @@ class Graph:
         df = df.to_crs({'init': 'epsg:4326'})
 
         id_column = infer_id_column(df, id_column)
-        df.index = df[id_column]
 
         log.info('Constructing graph.')
         graph = construct_graph_from_df(df, adjacency_type=adjacency_type,
